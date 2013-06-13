@@ -2,7 +2,7 @@
 ##j## BOF
 
 """
-dNG.pas.data.tasks.store.memory
+dNG.pas.data.tasks.store.Memory
 """
 """n// NOTE
 ----------------------------------------------------------------------------
@@ -39,14 +39,14 @@ NOTE_END //n"""
 from copy import copy
 from time import time
 
-from dNG.pas.data.binary import direct_binary
-from dNG.pas.plugins.hooks import direct_hooks
-from .abstract import direct_abstract
+from dNG.pas.data.binary import Binary
+from dNG.pas.plugins.hooks import Hooks
+from .abstract import Abstract
 
-class direct_memory(direct_abstract):
+class Memory(Abstract):
 #
 	"""
-"direct_memory" stores tasks in the application memory.
+"Memory" stores tasks in the application memory.
 
 :author:     direct Netware Group
 :copyright:  direct Netware Group - All rights reserved
@@ -60,12 +60,12 @@ class direct_memory(direct_abstract):
 	def __init__(self):
 	#
 		"""
-Constructor __init__(direct_memory)
+Constructor __init__(Memory)
 
 :since: v0.1.00
 		"""
 
-		direct_abstract.__init__(self)
+		Abstract.__init__(self)
 
 		self.tasks = [ ]
 		"""
@@ -86,7 +86,7 @@ Get the implementation specific next "run()" UNIX timestamp.
 
 		var_return = -1
 
-		with direct_memory.synchronized:
+		with Memory.synchronized:
 		#
 			if (len(self.tasks) > 0): var_return = self.tasks[0]['timestamp']
 		#
@@ -103,18 +103,18 @@ Worker loop
 :since:  v0.1.00
 		"""
 
-		with direct_memory.synchronized:
+		with Memory.synchronized:
 		#
 			if (len(self.tasks) > 0 and self.tasks[0]['timestamp'] <= time()):
 			#
 				task = self.tasks.pop(0)
 
-				if ("timeout" not in task): direct_hooks.call(task['hook'], **task['params'])
+				if ("timeout" not in task): Hooks.call(task['hook'], **task['params'])
 				elif (self.log_handler != None): self.log_handler.debug("pas.tasks timed out TID '{0}'".format(task['tid']))
 			#
 		#
 
-		direct_abstract.run(self)
+		Abstract.run(self)
 	#
 
 	def task_add(self, tid, hook, timeout = None, params = { }):
@@ -129,32 +129,32 @@ Add a new task with the given TID to the storage for later activation.
 :since: v0.1.00
 		"""
 
-		index = 1
-		tid = direct_binary.str(tid)
+		var_index = 1
+		tid = Binary.str(tid)
 		if (timeout == None): timeout = self.task_timeout
 
-		with direct_memory.synchronized:
+		with Memory.synchronized:
 		#
 			if (self.log_handler != None): self.log_handler.debug("pas.tasks added TID '{0}' with target '{1}'".format(tid, hook))
-			index = len(self.tasks)
+			var_index = len(self.tasks)
 			timestamp = time() + timeout
 
-			if (index == 0):
+			if (var_index == 0):
 			#
-				direct_hooks.register("dNG.pas.status.shutdown", self.stop)
-				direct_hooks.register("dNG.pas.tasks.call", self.task_call)
-				direct_memory.get_instance()
+				Hooks.register("dNG.pas.status.shutdown", self.stop)
+				Hooks.register("dNG.pas.tasks.call", self.task_call)
+				Memory.get_instance()
 			#
 
 			if (timeout > self.task_timeout):
 			#
-				if (index > 0):
+				if (var_index > 0):
 				#
-					for position in range(index - 1, -1, -1):
+					for position in range(var_index - 1, -1, -1):
 					#
 						if (timestamp > self.tasks[position]['timestamp']):
 						#
-							index = position
+							var_index = position
 							break
 						#
 					#
@@ -162,25 +162,25 @@ Add a new task with the given TID to the storage for later activation.
 			#
 			else:
 			#
-				index = None
+				var_index = None
 
 				for position in range(0, len(self.tasks)):
 				#
 					if (timestamp < self.tasks[position]['timestamp']):
 					#
-						index = position
+						var_index = position
 						break
 					#
 				#
 
-				if (index == None): index = len(self.tasks)
+				if (var_index == None): var_index = len(self.tasks)
 			#
 
 			params['tid'] = tid
-			self.tasks.insert(index, { "hook": hook, "params": params, "tid": tid, "timestamp": timestamp })
+			self.tasks.insert(var_index, { "hook": hook, "params": params, "tid": tid, "timestamp": timestamp })
 		#
 
-		if (index < 1): self.update_timestamp()
+		if (var_index < 1): self.update_timestamp()
 	#
 
 	def task_get(self, tid):
@@ -196,9 +196,9 @@ Returns the task for the given TID.
 
 		var_return = None
 
-		tid = direct_binary.str(tid)
+		tid = Binary.str(tid)
 
-		with direct_memory.synchronized:
+		with Memory.synchronized:
 		#
 			for position in range(0, len(self.tasks)):
 			#
@@ -225,32 +225,32 @@ Registers a new task with the given TID to the storage for later use.
 :since: v0.1.00
 		"""
 
-		index = 1
-		tid = direct_binary.str(tid)
+		var_index = 1
+		tid = Binary.str(tid)
 		if (timeout == None): timeout = self.task_timeout
 
-		with direct_memory.synchronized:
+		with Memory.synchronized:
 		#
 			if (self.log_handler != None): self.log_handler.debug("pas.tasks registered TID '{0}' with target '{1}'".format(tid, hook))
-			index = len(self.tasks)
+			var_index = len(self.tasks)
 			timestamp = time() + timeout
 
-			if (index == 0):
+			if (var_index == 0):
 			#
-				direct_hooks.register("dNG.pas.status.shutdown", self.stop)
-				direct_hooks.register("dNG.pas.tasks.call", self.task_call)
-				direct_memory.get_instance()
+				Hooks.register("dNG.pas.status.shutdown", self.stop)
+				Hooks.register("dNG.pas.tasks.call", self.task_call)
+				Memory.get_instance()
 			#
 
 			if (timeout > self.task_timeout):
 			#
-				if (index > 0):
+				if (var_index > 0):
 				#
-					for position in range(index - 1, -1, -1):
+					for position in range(var_index - 1, -1, -1):
 					#
 						if (timestamp > self.tasks[position]['timestamp']):
 						#
-							index = position
+							var_index = position
 							break
 						#
 					#
@@ -258,25 +258,25 @@ Registers a new task with the given TID to the storage for later use.
 			#
 			else:
 			#
-				index = None
+				var_index = None
 
 				for position in range(0, len(self.tasks)):
 				#
 					if (timestamp < self.tasks[position]['timestamp']):
 					#
-						index = position
+						var_index = position
 						break
 					#
 				#
 
-				if (index == None): index = len(self.tasks)
+				if (var_index == None): var_index = len(self.tasks)
 			#
 
 			params['tid'] = tid
-			self.tasks.insert(index, { "hook": hook, "params": params, "tid": tid, "timestamp": timestamp, "timeout": timeout })
+			self.tasks.insert(var_index, { "hook": hook, "params": params, "tid": tid, "timestamp": timestamp, "timeout": timeout })
 		#
 
-		if (index < 1): self.update_timestamp()
+		if (var_index < 1): self.update_timestamp()
 	#
 
 	def timeout_reregister(self, tid):
@@ -288,7 +288,7 @@ Updates the task with the given TID to push its expiration time.
 :since:  v0.1.00
 		"""
 
-		tid = direct_binary.str(tid)
+		tid = Binary.str(tid)
 		task = self.task_get(tid)
 
 		if (task == None): var_return = False
@@ -312,27 +312,27 @@ Removes the given TID from the storage.
 :since:  v0.1.00
 		"""
 
-		index = 1
+		var_index = 1
 		var_return = True
 
-		tid = direct_binary.str(tid)
+		tid = Binary.str(tid)
 
-		with direct_memory.synchronized:
+		with Memory.synchronized:
 		#
-			index = len(self.tasks)
+			var_index = len(self.tasks)
 
-			if (index > 0):
+			if (var_index > 0):
 			#
 				tasks = (self.tasks.copy() if (hasattr(self.tasks, "copy")) else copy(self.tasks))
 				tasks.reverse()
 
-				for position in range(index - 1, -1, -1):
+				for position in range(var_index - 1, -1, -1):
 				#
 					if (self.tasks[position]['tid'] == tid):
 					#
 						if (self.log_handler != None): self.log_handler.debug("pas.tasks removed TID '{0}'".format(tid))
 
-						index = position
+						var_index = position
 						self.tasks.pop(position)
 						var_return = True
 
@@ -343,13 +343,13 @@ Removes the given TID from the storage.
 
 			if (len(self.tasks) == 0):
 			#
-				direct_hooks.unregister("dNG.pas.status.shutdown", self.stop)
-				direct_hooks.unregister("dNG.pas.tasks.call", self.task_call)
+				Hooks.unregister("dNG.pas.status.shutdown", self.stop)
+				Hooks.unregister("dNG.pas.tasks.call", self.task_call)
 				self.return_instance()
 			#
 		#
 
-		if (index < 1): self.update_timestamp()
+		if (var_index < 1): self.update_timestamp()
 		return var_return
 	#
 
@@ -357,26 +357,26 @@ Removes the given TID from the storage.
 	def get_instance(count = True):
 	#
 		"""
-Get the control_point singleton.
+Get the Memory singleton.
 
 :param count: Count "get()" request
 
-:return: (direct_control_point) Object on success
+:return: (Memory) Object on success
 :since:  v0.1.00
 		"""
 
-		with direct_memory.synchronized:
+		with Memory.synchronized:
 		#
-			if (direct_memory.instance == None):
+			if (Memory.instance == None):
 			#
-				direct_memory.instance = direct_memory()
-				direct_memory.instance.start()
+				Memory.instance = Memory()
+				Memory.instance.start()
 			#
 
-			if (count): direct_memory.ref_count += 1
+			if (count): Memory.ref_count += 1
 		#
 
-		return direct_memory.instance
+		return Memory.instance
 	#
 
 	@staticmethod
@@ -392,7 +392,7 @@ Registers a new task with the given TID to the storage for later use.
 :since: v0.1.00
 		"""
 
-		instance = direct_memory.get_instance(False)
+		instance = Memory.get_instance(False)
 		instance.timeout_register(tid, hook, timeout, params)
 	#
 
@@ -406,7 +406,7 @@ Updates the task with the given TID to push its expiration time.
 :since:  v0.1.00
 		"""
 
-		instance = direct_memory.get_instance(False)
+		instance = Memory.get_instance(False)
 		return instance.timeout_reregister(tid)
 	#
 
@@ -420,7 +420,7 @@ Removes the given TID from the storage.
 :since:  v0.1.00
 		"""
 
-		instance = direct_memory.get_instance(False)
+		instance = Memory.get_instance(False)
 		return instance.timeout_unregister(tid)
 	#
 #

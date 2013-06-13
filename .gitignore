@@ -4,4 +4,4 @@ __py*
 .pyc
 make*.py*
 nbproject
-PSD.queue.*
+pas_tasks.*

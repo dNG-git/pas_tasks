@@ -2,7 +2,7 @@
 ##j## BOF
 
 """
-dNG.pas.data.tasks.store.abstract
+dNG.pas.data.tasks.store.Abstract
 """
 """n// NOTE
 ----------------------------------------------------------------------------
@@ -36,12 +36,12 @@ http://www.direct-netware.de/redirect.py?licenses;gpl
 ----------------------------------------------------------------------------
 NOTE_END //n"""
 
-from dNG.pas.data.abstract_timed_tasks import direct_abstract_timed_tasks
-from dNG.pas.data.settings import direct_settings
-from dNG.pas.module.named_loader import direct_named_loader
-from dNG.pas.plugins.hooks import direct_hooks
+from dNG.pas.data.abstract_timed_tasks import AbstractTimedTasks
+from dNG.pas.data.settings import Settings
+from dNG.pas.module.named_loader import NamedLoader
+from dNG.pas.plugins.hooks import Hooks
 
-class direct_abstract(direct_abstract_timed_tasks):
+class Abstract(AbstractTimedTasks):
 #
 	"""
 Abstract class for task stores.
@@ -58,19 +58,19 @@ Abstract class for task stores.
 	def __init__(self):
 	#
 		"""
-Constructor __init__(direct_abstract)
+Constructor __init__(Abstract)
 
 :since: v0.1.00
 		"""
 
-		direct_abstract_timed_tasks.__init__(self)
+		AbstractTimedTasks.__init__(self)
 
-		self.log_handler = direct_named_loader.get_singleton("dNG.pas.data.logging.log_handler", False)
+		self.log_handler = NamedLoader.get_singleton("dNG.pas.data.logging.LogHandler", False)
 		"""
 The log_handler is called whenever debug messages should be logged or errors
 happened.
 		"""
-		self.task_timeout = int(direct_settings.get("pas_tasks_timeout", 900))
+		self.task_timeout = int(Settings.get("pas_tasks_timeout", 900))
 		"""
 Default timeout for an activated task
 		"""
@@ -79,7 +79,7 @@ Default timeout for an activated task
 	def __del__(self):
 	#
 		"""
-Destructor __del__(direct_abstract)
+Destructor __del__(Abstract)
 
 :since: v0.1.00
 		"""
@@ -95,16 +95,16 @@ The last "return_instance()" call will free the singleton reference.
 :since: v0.1.00
 		"""
 
-		with direct_abstract.synchronized:
+		with Abstract.synchronized:
 		#
-			if (direct_abstract.instance != None):
+			if (Abstract.instance != None):
 			#
-				if (direct_abstract.ref_count > 0): direct_abstract.ref_count -= 1
+				if (Abstract.ref_count > 0): Abstract.ref_count -= 1
 
-				if (direct_abstract.ref_count == 0):
+				if (Abstract.ref_count == 0):
 				#
 					self.stop()
-					direct_abstract.instance = None
+					Abstract.instance = None
 				#
 			#
 		#
@@ -134,7 +134,7 @@ Called to initiate a task if its known and valid.
 			if (is_valid):
 			#
 				if ("timeout" in task): self.timeout_reregister(params['tid'])
-				var_return = direct_hooks.call(task['hook'], **task['params'])
+				var_return = Hooks.call(task['hook'], **task['params'])
 			#
 		#
 
