@@ -36,12 +36,12 @@ http://www.direct-netware.de/redirect.py?licenses;gpl
 ----------------------------------------------------------------------------
 NOTE_END //n"""
 
-from dNG.pas.data.abstract_timed_tasks import AbstractTimedTasks
 from dNG.pas.data.settings import Settings
+from dNG.pas.data.tasks.abstract_timed import AbstractTimed
 from dNG.pas.module.named_loader import NamedLoader
 from dNG.pas.plugins.hooks import Hooks
 
-class Abstract(AbstractTimedTasks):
+class Abstract(AbstractTimed):
 #
 	"""
 Abstract class for task stores.
@@ -55,6 +55,11 @@ Abstract class for task stores.
              GNU General Public License 2
 	"""
 
+	weakref_instance = None
+	"""
+Tasks weakref instance
+	"""
+
 	def __init__(self):
 	#
 		"""
@@ -63,7 +68,7 @@ Constructor __init__(Abstract)
 :since: v0.1.00
 		"""
 
-		AbstractTimedTasks.__init__(self)
+		AbstractTimed.__init__(self)
 
 		self.log_handler = NamedLoader.get_singleton("dNG.pas.data.logging.LogHandler", False)
 		"""
@@ -74,40 +79,6 @@ happened.
 		"""
 Default timeout for an activated task
 		"""
-	#
-
-	def __del__(self):
-	#
-		"""
-Destructor __del__(Abstract)
-
-:since: v0.1.00
-		"""
-
-		if (self.log_handler != None): self.log_handler.return_instance()
-	#
-
-	def return_instance(self):
-	#
-		"""
-The last "return_instance()" call will free the singleton reference.
-
-:since: v0.1.00
-		"""
-
-		with Abstract.synchronized:
-		#
-			if (Abstract.instance != None):
-			#
-				if (Abstract.ref_count > 0): Abstract.ref_count -= 1
-
-				if (Abstract.ref_count == 0):
-				#
-					self.stop()
-					Abstract.instance = None
-				#
-			#
-		#
 	#
 
 	def task_call(self, params = None, last_return = None):
@@ -122,9 +93,9 @@ Called to initiate a task if its known and valid.
 :since:  v0.1.00
 		"""
 
-		var_return = last_return
+		_return = last_return
 
-		if (var_return == None):
+		if (_return == None):
 		#
 			task = self.task_get(params['tid'])
 
@@ -134,11 +105,11 @@ Called to initiate a task if its known and valid.
 			if (is_valid):
 			#
 				if ("timeout" in task): self.timeout_reregister(params['tid'])
-				var_return = Hooks.call(task['hook'], **task['params'])
+				_return = Hooks.call(task['hook'], **task['params'])
 			#
 		#
 
-		return var_return
+		return _return
 	#
 
 	def task_get(self, tid):
