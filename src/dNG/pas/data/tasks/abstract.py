@@ -2,7 +2,7 @@
 ##j## BOF
 
 """
-dNG.pas.data.tasks.store.Abstract
+dNG.pas.data.tasks.Abstract
 """
 """n// NOTE
 ----------------------------------------------------------------------------
@@ -37,11 +37,13 @@ http://www.direct-netware.de/redirect.py?licenses;gpl
 NOTE_END //n"""
 
 from dNG.pas.data.settings import Settings
-from dNG.pas.data.tasks.abstract_timed import AbstractTimed
+from dNG.pas.data.traced_exception import TracedException
 from dNG.pas.module.named_loader import NamedLoader
 from dNG.pas.plugins.hooks import Hooks
+from dNG.pas.runtime.thread import Thread
+from dNG.pas.tasks.abstract import Abstract as AbstractTask
 
-class Abstract(AbstractTimed):
+class Abstract(object):
 #
 	"""
 Abstract class for task stores.
@@ -68,11 +70,9 @@ Constructor __init__(Abstract)
 :since: v0.1.00
 		"""
 
-		AbstractTimed.__init__(self)
-
 		self.log_handler = NamedLoader.get_singleton("dNG.pas.data.logging.LogHandler", False)
 		"""
-The log_handler is called whenever debug messages should be logged or errors
+The LogHandler is called whenever debug messages should be logged or errors
 happened.
 		"""
 		self.task_timeout = int(Settings.get("pas_tasks_timeout", 900))
@@ -105,7 +105,7 @@ Called to initiate a task if its known and valid.
 			if (is_valid):
 			#
 				if ("timeout" in task): self.timeout_reregister(params['tid'])
-				_return = Hooks.call(task['hook'], **task['params'])
+				_return = self._task_run(task)
 			#
 		#
 
@@ -123,7 +123,44 @@ Returns the task for the given TID.
 :since:  v0.1.00
 		"""
 
-		raise RuntimeError("Not implemented", 38)
+		raise TracedException("Not implemented")
+	#
+
+	def _task_run(self, task):
+	#
+		"""
+Executes a task synchronously.
+
+:param task: Task definition
+
+:return: (mixed) Task result
+:since:  v0.1.00
+		"""
+
+		_return = None
+
+		if (isinstance(task['hook'], AbstractTask)): _return = task['hook'].run(self, **task['params'])
+		else: _return = Hooks.call(task['hook'], **task['params'])
+
+		return _return
+	#
+
+	def _task_start(self, task):
+	#
+		"""
+Calls a task asynchronously.
+
+:param task: Task definition
+
+:since: v0.1.00
+		"""
+
+		if (isinstance(task['hook'], AbstractTask)): task['hook'].start(self, **task['params'])
+		else:
+		#
+			thread = Thread(target = self._task_run, args = ( task, ))
+			thread.start()
+		#
 	#
 
 	def timeout_register(self, tid, hook, timeout = None, **params):
@@ -138,7 +175,7 @@ Registers a new task with the given TID to the storage for later use.
 :since: v0.1.00
 		"""
 
-		raise RuntimeError("Not implemented", 38)
+		raise TracedException("Not implemented")
 	#
 
 	def timeout_reregister(self, tid):
@@ -150,7 +187,7 @@ Updates the task with the given TID to push its expiration time.
 :since:  v0.1.00
 		"""
 
-		raise RuntimeError("Not implemented", 38)
+		raise TracedException("Not implemented")
 	#
 
 	def timeout_unregister(self, tid):
@@ -162,7 +199,7 @@ Removes the given TID from the storage.
 :since:  v0.1.00
 		"""
 
-		raise RuntimeError("Not implemented", 38)
+		raise TracedException("Not implemented")
 	#
 #
 
