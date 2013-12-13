@@ -109,35 +109,6 @@ Task ID
 		"""
 	#
 
-	def __enter__(self):
-	#
-		"""
-python.org: Enter the runtime context related to this object.
-
-:since: v0.1.00
-		"""
-
-		pass
-	#
-
-	def __exit__(self, exc_type, exc_value, traceback):
-	#
-		"""
-python.org: Exit the runtime context related to this object.
-
-:since: v0.1.00
-		"""
-
-		with AbstractLrtHook.lock:
-		#
-			if (self.context_id in AbstractLrtHook.context_queues):
-			#
-				if (self._task_get() != None): self.log_handler.error("LRT process found queue elements after execution")
-				del(AbstractLrtHook.context_queues[self.context_id])
-			#
-		#
-	#
-
 	def run(self, task_store, tid, **params):
 	#
 		"""
@@ -159,24 +130,21 @@ Returns the manager instance responsible for this hook.
 :since:  v0.1.00
 		"""
 
-		with self:
+		with AbstractLrtHook.lock: task = self._task_get()
+
+		while (task != None):
 		#
-			with AbstractLrtHook.lock: task = self._task_get()
-
-			while (task != None):
+			try: task._run_hook()
+			except Exception as handled_exception:
 			#
-				try: task._run_hook()
-				except Exception as handled_exception:
-				#
-					if (self.log_handler != None): self.log_handler.error(handled_exception)
-				#
+				if (self.log_handler != None): self.log_handler.error(handled_exception)
+			#
 
-				with AbstractLrtHook.lock:
-				#
-					AbstractLrtHook.context_queues[self.context_id].task_done()
-					task = self._task_get()
-					if (task == None): del(AbstractLrtHook.context_queues[self.context_id])
-				#
+			with AbstractLrtHook.lock:
+			#
+				AbstractLrtHook.context_queues[self.context_id].task_done()
+				task = self._task_get()
+				if (task == None): del(AbstractLrtHook.context_queues[self.context_id])
 			#
 		#
 	#
