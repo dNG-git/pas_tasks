@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<pas_settings_file_v1 xmlns="urn:de-direct-netware-xmlns:pas.psd.v1">
-<pas><psd>
- <event><table value="pas_event" /></event>
- <queue><table value="pas_queue" /></queue>
-</psd></pas>
-</pas_settings_file_v1>

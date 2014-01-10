@@ -42,8 +42,8 @@ try: from queue import Queue
 except ImportError: from Queue import Queue
 
 from dNG.pas.data.settings import Settings
-from dNG.pas.data.traced_exception import TracedException
 from dNG.pas.module.named_loader import NamedLoader
+from dNG.pas.runtime.not_implemented_exception import NotImplementedException
 from dNG.pas.runtime.thread_lock import ThreadLock
 from .abstract import Abstract
 
@@ -109,7 +109,7 @@ Task ID
 		"""
 	#
 
-	def run(self, task_store, tid, **params):
+	def run(self, task_store, tid, **kwargs):
 	#
 		"""
 Starts the execution of this hook synchronously.
@@ -118,7 +118,7 @@ Starts the execution of this hook synchronously.
 :since:  v0.1.00
 		"""
 
-		raise TracedException("Not implemented")
+		raise NotImplementedException()
 	#
 
 	def _run(self):
@@ -158,7 +158,7 @@ Hook execution
 :since:  v0.1.00
 		"""
 
-		raise TracedException("Not implemented")
+		raise NotImplementedException()
 	#
 
 	def _task_get(self):
@@ -173,7 +173,7 @@ Returns the next task from the context queue if any.
 		return (None if (AbstractLrtHook.context_queues[self.context_id].empty()) else AbstractLrtHook.context_queues[self.context_id].get(False))
 	#
 
-	def start(self, task_store, tid, **params):
+	def start(self, task_store, tid, **kwargs):
 	#
 		"""
 Starts the execution of this hook asynchronously.
@@ -186,7 +186,7 @@ Starts the execution of this hook asynchronously.
 		with AbstractLrtHook.lock:
 		#
 			if (AbstractLrtHook.context_limit < 1): AbstractLrtHook.context_limit = Settings.get("pas_global_tasks_lrt_limit", 1)
-			if (self.params == None): self.params = params
+			if (self.params == None): self.params = kwargs
 
 			if (self.context_id in AbstractLrtHook.context_queues):
 			#

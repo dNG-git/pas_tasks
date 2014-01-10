@@ -222,7 +222,7 @@ Worker loop
 		if (task != None):
 		#
 			if ("timeout" not in task): self._task_start(task)
-			elif (self.log_handler != None): self.log_handler.debug("pas.Tasks timed out TID '{1}'".format(self, task['tid']))
+			elif (self.log_handler != None): self.log_handler.debug("pas.Tasks timed out TID '{0}'".format(task['tid']))
 		#
 	#
 
@@ -241,7 +241,7 @@ Add a new task with the given TID to the storage for later activation.
 		tid = Binary.str(tid)
 		if (timeout == None): timeout = self.task_timeout
 
-		if (self.log_handler != None): self.log_handler.debug("pas.Tasks added TID '{1}' with target '{2}'".format(self, tid, hook))
+		if (self.log_handler != None): self.log_handler.debug("pas.Tasks added TID '{0}' with target '{1!r}'".format(tid, hook))
 
 		params = kwargs
 		params['tid'] = tid
@@ -292,7 +292,7 @@ Removes the given TID from the storage.
 		tid = Binary.str(tid)
 		_return = self._delete(tid)
 
-		if (_return and self.log_handler != None): self.log_handler.debug("pas.Tasks removed TID '{1}'".format(self, tid))
+		if (_return and self.log_handler != None): self.log_handler.debug("pas.Tasks removed TID '{0}'".format(tid))
 		return _return
 	#
 
@@ -340,7 +340,7 @@ Registers a new task with the given TID to the storage for later use.
 		tid = Binary.str(tid)
 		if (timeout == None): timeout = self.task_timeout
 
-		if (self.log_handler != None): self.log_handler.debug("pas.Tasks registered TID '{1}' with target '{2}'".format(self, tid, hook))
+		if (self.log_handler != None): self.log_handler.debug("pas.Tasks registered TID '{0}' with target '{1!r}'".format(tid, hook))
 
 		params = kwargs
 		params['tid'] = tid
@@ -387,7 +387,7 @@ Removes the given TID from the storage.
 		tid = Binary.str(tid)
 		_return = self._delete(tid)
 
-		if (_return and self.log_handler != None): self.log_handler.debug("pas.Tasks removed TID '{1}'".format(self, tid))
+		if (_return and self.log_handler != None): self.log_handler.debug("pas.Tasks removed TID '{0}'".format(tid))
 		return _return
 	#
 

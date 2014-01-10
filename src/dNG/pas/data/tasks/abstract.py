@@ -37,9 +37,9 @@ http://www.direct-netware.de/redirect.py?licenses;gpl
 NOTE_END //n"""
 
 from dNG.pas.data.settings import Settings
-from dNG.pas.data.traced_exception import TracedException
 from dNG.pas.module.named_loader import NamedLoader
 from dNG.pas.plugins.hooks import Hooks
+from dNG.pas.runtime.not_implemented_exception import NotImplementedException
 from dNG.pas.runtime.thread import Thread
 from dNG.pas.tasks.abstract import Abstract as AbstractTask
 
@@ -123,7 +123,7 @@ Returns the task for the given TID.
 :since:  v0.1.00
 		"""
 
-		raise TracedException("Not implemented")
+		raise NotImplementedException()
 	#
 
 	def _task_run(self, task):
@@ -175,7 +175,7 @@ Registers a new task with the given TID to the storage for later use.
 :since: v0.1.00
 		"""
 
-		raise TracedException("Not implemented")
+		raise NotImplementedException()
 	#
 
 	def timeout_reregister(self, tid):
@@ -187,7 +187,7 @@ Updates the task with the given TID to push its expiration time.
 :since:  v0.1.00
 		"""
 
-		raise TracedException("Not implemented")
+		raise NotImplementedException()
 	#
 
 	def timeout_unregister(self, tid):
@@ -199,7 +199,7 @@ Removes the given TID from the storage.
 :since:  v0.1.00
 		"""
 
-		raise TracedException("Not implemented")
+		raise NotImplementedException()
 	#
 #
 
