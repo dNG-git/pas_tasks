@@ -36,6 +36,8 @@ http://www.direct-netware.de/redirect.py?licenses;gpl
 ----------------------------------------------------------------------------
 NOTE_END //n"""
 
+from dNG.pas.runtime.not_implemented_exception import NotImplementedException
+
 class Abstract(object):
 #
 	"""
@@ -71,7 +73,7 @@ Starts the execution of this hook asynchronously.
 :since: v0.1.00
 		"""
 
-		return False
+		raise NotImplementedException()
 	#
 #
 
