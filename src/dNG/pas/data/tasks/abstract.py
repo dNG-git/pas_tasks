@@ -57,6 +57,8 @@ Abstract class for task stores.
              GNU General Public License 2
 	"""
 
+	# pylint: disable=unused-argument
+
 	weakref_instance = None
 	"""
 Tasks weakref instance

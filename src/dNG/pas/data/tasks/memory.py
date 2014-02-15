@@ -87,6 +87,8 @@ Removes the given TID from the storage.
 :since:  v0.1.00
 		"""
 
+		# pylint: disable=no-member
+
 		_return = False
 
 		with Memory.lock:

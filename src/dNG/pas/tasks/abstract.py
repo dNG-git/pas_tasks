@@ -53,6 +53,8 @@ tasks (LRT).
              GNU General Public License 2
 	"""
 
+	# pylint: disable=unused-argument
+
 	def run(self, task_store, tid, **params):
 	#
 		"""

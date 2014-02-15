@@ -36,6 +36,8 @@ http://www.direct-netware.de/redirect.py?licenses;gpl
 ----------------------------------------------------------------------------
 NOTE_END //n"""
 
+# pylint: disable=import-error
+
 from threading import Thread
 
 try: from queue import Queue
@@ -129,6 +131,8 @@ Returns the manager instance responsible for this hook.
 :return: (object) Hook manager on success
 :since:  v0.1.00
 		"""
+
+		# pylint: disable=broad-except,protected-access
 
 		with AbstractLrtHook.lock: task = self._task_get()
 
