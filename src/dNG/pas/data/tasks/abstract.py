@@ -59,11 +59,6 @@ Abstract class for task stores.
 
 	# pylint: disable=unused-argument
 
-	weakref_instance = None
-	"""
-Tasks weakref instance
-	"""
-
 	def __init__(self):
 	#
 		"""
@@ -81,6 +76,36 @@ happened.
 		"""
 Default timeout for an activated task
 		"""
+	#
+
+	def is_registered(self, tid, hook = None):
+	#
+		"""
+Checks if a given task ID is known.
+
+:param tid: Task ID
+:param hook: Task hook to be called
+
+:return: (bool) True if defined
+:since:  v0.1.00
+		"""
+
+		raise NotImplementedException()
+	#
+
+	def task_add(self, tid, hook, timeout = None, **kwargs):
+	#
+		"""
+Add a new task with the given TID to the storage for later activation.
+
+:param tid: Task ID
+:param hook: Task hook to be called
+:param timeout: Timeout in seconds; None to use global task timeout
+
+:since: v0.1.00
+		"""
+
+		raise NotImplementedException()
 	#
 
 	def task_call(self, params = None, last_return = None):
@@ -122,6 +147,20 @@ Returns the task for the given TID.
 :param tid: Task ID
 
 :return: (dict) Task definition
+:since:  v0.1.00
+		"""
+
+		raise NotImplementedException()
+	#
+
+	def task_remove(self, tid):
+	#
+		"""
+Removes the given TID from the storage.
+
+:param tid: Task ID
+
+:return: (bool) True on success
 :since:  v0.1.00
 		"""
 

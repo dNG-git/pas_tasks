@@ -61,6 +61,11 @@ ones.
              GNU General Public License 2
 	"""
 
+	weakref_instance = None
+	"""
+Tasks weakref instance
+	"""
+
 	def __init__(self):
 	#
 		"""
@@ -207,6 +212,35 @@ Add a new task with the given TID to the storage for later activation.
 		#
 	#
 
+	def is_registered(self, tid, hook = None):
+	#
+		"""
+Checks if a given task ID is known.
+
+:param tid: Task ID
+:param hook: Task hook to be called
+
+:return: (bool) True if defined
+:since:  v0.1.00
+		"""
+
+		_return = False
+
+		with Memory.lock:
+		#
+			for position in range(0, len(self.tasks)):
+			#
+				if (tid == self.tasks[position]['tid'] and (hook == None or hook == self.tasks[position]['hook'])):
+				#
+					_return = True
+					break
+				#
+			#
+		#
+
+		return _return
+	#
+
 	def run(self):
 	#
 		"""
@@ -295,35 +329,6 @@ Removes the given TID from the storage.
 		_return = self._delete(tid)
 
 		if (_return and self.log_handler != None): self.log_handler.debug("pas.Tasks removed TID '{0}'".format(tid))
-		return _return
-	#
-
-	def is_registered(self, tid, hook = None):
-	#
-		"""
-Checks if a given task ID is known.
-
-:param tid: Task ID
-:param hook: Task hook to be called
-
-:return: (bool) True if defined
-:since:  v0.1.00
-		"""
-
-		_return = False
-
-		with Memory.lock:
-		#
-			for position in range(0, len(self.tasks)):
-			#
-				if (tid == self.tasks[position]['tid'] and (hook == None or hook == self.tasks[position]['hook'])):
-				#
-					_return = True
-					break
-				#
-			#
-		#
-
 		return _return
 	#
 
@@ -419,52 +424,6 @@ Get the Memory singleton.
 		#
 
 		return _return
-	#
-
-	@staticmethod
-	def register(tid, hook, timeout = None, **kwargs):
-	#
-		"""
-Registers a new task with the given TID to the storage for later use.
-
-:param tid: Task ID
-:param hook: Task hook to be called
-:param timeout: Timeout in seconds; None to use global task timeout
-
-:since: v0.1.00
-		"""
-
-		Memory.get_instance().timeout_register(tid, hook, timeout, **kwargs)
-	#
-
-	@staticmethod
-	def reregister(tid):
-	#
-		"""
-Updates the task with the given TID to push its expiration time.
-
-:param tid: Task ID
-
-:return: (bool) True on success
-:since:  v0.1.00
-		"""
-
-		return Memory.get_instance().timeout_reregister(tid)
-	#
-
-	@staticmethod
-	def unregister(tid):
-	#
-		"""
-Removes the given TID from the storage.
-
-:param tid: Task ID
-
-:return: (bool) True on success
-:since:  v0.1.00
-		"""
-
-		return Memory.get_instance().timeout_unregister(tid)
 	#
 #
 
