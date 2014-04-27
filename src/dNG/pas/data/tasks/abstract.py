@@ -41,6 +41,7 @@ from dNG.pas.module.named_loader import NamedLoader
 from dNG.pas.plugins.hooks import Hooks
 from dNG.pas.runtime.not_implemented_exception import NotImplementedException
 from dNG.pas.runtime.thread import Thread
+from dNG.pas.runtime.value_exception import ValueException
 from dNG.pas.tasks.abstract import Abstract as AbstractTask
 
 class Abstract(object):
@@ -108,10 +109,11 @@ Add a new task with the given TID to the storage for later activation.
 		raise NotImplementedException()
 	#
 
-	def task_call(self, params = None, last_return = None):
+	def task_call(self, params, last_return = None):
 	#
 		"""
-Called to initiate a task if its known and valid.
+Called to initiate a task if its known and valid. A task is only executed
+if "last_return" is None.
 
 :param params: Parameter specified
 :param last_return: The return value from the last hook called.
@@ -122,7 +124,7 @@ Called to initiate a task if its known and valid.
 
 		_return = last_return
 
-		if (_return == None):
+		if (_return == None and "tid" in params):
 		#
 			task = self.task_get(params['tid'])
 
@@ -167,12 +169,12 @@ Removes the given TID from the storage.
 		raise NotImplementedException()
 	#
 
-	def _task_run(self, task):
+	def _task_run(self, task_data):
 	#
 		"""
 Executes a task synchronously.
 
-:param task: Task definition
+:param task_data: Task definition
 
 :return: (mixed) Task result
 :since:  v0.1.00
@@ -180,26 +182,30 @@ Executes a task synchronously.
 
 		_return = None
 
-		if (isinstance(task['hook'], AbstractTask)): _return = task['hook'].run(self, **task['params'])
-		else: _return = Hooks.call(task['hook'], **task['params'])
+		if ("hook" not in task_data or "params" not in task_data): raise ValueException("Given task is unsupported")
+
+		if (isinstance(task_data['hook'], AbstractTask)): _return = task_data['hook'].run(self, **task_data['params'])
+		else: _return = Hooks.call(task_data['hook'], **task_data['params'])
 
 		return _return
 	#
 
-	def _task_start(self, task):
+	def _task_start(self, task_data):
 	#
 		"""
 Calls a task asynchronously.
 
-:param task: Task definition
+:param task_data: Task definition
 
 :since: v0.1.00
 		"""
 
-		if (isinstance(task['hook'], AbstractTask)): task['hook'].start(self, **task['params'])
+		if ("hook" not in task_data or "params" not in task_data): raise ValueException("Given task is unsupported")
+
+		if (isinstance(task_data['hook'], AbstractTask)): task_data['hook'].start(self, **task_data['params'])
 		else:
 		#
-			thread = Thread(target = self._task_run, args = ( task, ))
+			thread = Thread(target = self._task_run, args = ( task_data, ))
 			thread.start()
 		#
 	#
@@ -237,6 +243,19 @@ Updates the task with the given TID to push its expiration time.
 Removes the given TID from the storage.
 
 :return: (bool) True on success
+:since:  v0.1.00
+		"""
+
+		raise NotImplementedException()
+	#
+
+	@staticmethod
+	def get_instance():
+	#
+		"""
+Get a tasks instance.
+
+:return: (object) Task instance on success
 :since:  v0.1.00
 		"""
 

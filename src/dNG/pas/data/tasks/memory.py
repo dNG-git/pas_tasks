@@ -42,6 +42,7 @@ from weakref import ref
 
 from dNG.pas.data.binary import Binary
 from dNG.pas.plugins.hooks import Hooks
+from dNG.pas.runtime.thread_lock import ThreadLock
 from dNG.pas.tasks.abstract_timed import AbstractTimed
 from .abstract import Abstract
 
@@ -61,6 +62,10 @@ ones.
              GNU General Public License 2
 	"""
 
+	lock = ThreadLock()
+	"""
+Thread safety lock
+	"""
 	weakref_instance = None
 	"""
 Tasks weakref instance
@@ -168,12 +173,6 @@ Add a new task with the given TID to the storage for later activation.
 			#
 				tasks_count = len(self.tasks)
 
-				if (tasks_count == 0):
-				#
-					Hooks.register("dNG.pas.Status.shutdown", self.stop)
-					Hooks.register("dNG.pas.Tasks.call", self.task_call)
-				#
-
 				if (timeout > self.task_timeout):
 				#
 					index = 0
@@ -244,7 +243,7 @@ Checks if a given task ID is known.
 	def run(self):
 	#
 		"""
-Worker loop
+Timed task execution
 
 :since: v0.1.00
 		"""
@@ -417,8 +416,6 @@ Get the Memory singleton.
 			if (_return == None):
 			#
 				_return = Memory()
-				_return.start()
-
 				Memory.weakref_instance = ref(_return)
 			#
 		#
