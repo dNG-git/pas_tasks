@@ -47,9 +47,9 @@ from dNG.pas.data.settings import Settings
 from dNG.pas.module.named_loader import NamedLoader
 from dNG.pas.runtime.not_implemented_exception import NotImplementedException
 from dNG.pas.runtime.thread_lock import ThreadLock
-from .abstract import Abstract
+from .abstract_hook import AbstractHook
 
-class AbstractLrtHook(Abstract):
+class AbstractLrtHook(AbstractHook):
 #
 	"""
 Long running tasks (LRT) are resource intensive calls where only a limited
@@ -64,15 +64,17 @@ amount should run parallel.
              GNU General Public License 2
 	"""
 
-	context_limit = 0
+	# pylint: disable=unused-argument
+
+	_context_limit = 0
 	"""
 Limit for allowed context executions
 	"""
-	context_queues = { }
+	_context_queues = { }
 	"""
 Currently active context queues
 	"""
-	lock = ThreadLock()
+	_lock = ThreadLock()
 	"""
 Thread safety lock
 	"""
@@ -85,7 +87,7 @@ Constructor __init__(AbstractLrtHook)
 :since: v0.1.00
 		"""
 
-		Abstract.__init__(self)
+		AbstractHook.__init__(self)
 
 		self.context_id = "dNG.pas.tasks.Context"
 		"""
@@ -111,7 +113,7 @@ Task ID
 		"""
 	#
 
-	def run(self, task_store, tid, **kwargs):
+	def run(self, task_store, _tid, **kwargs):
 	#
 		"""
 Starts the execution of this hook synchronously.
@@ -134,7 +136,7 @@ Returns the manager instance responsible for this hook.
 
 		# pylint: disable=broad-except,protected-access
 
-		with AbstractLrtHook.lock: task = self._task_get()
+		with AbstractLrtHook._lock: task = self._task_get()
 
 		while (task != None):
 		#
@@ -144,11 +146,11 @@ Returns the manager instance responsible for this hook.
 				if (self.log_handler != None): self.log_handler.error(handled_exception)
 			#
 
-			with AbstractLrtHook.lock:
+			with AbstractLrtHook._lock:
 			#
-				AbstractLrtHook.context_queues[self.context_id].task_done()
+				AbstractLrtHook._context_queues[self.context_id].task_done()
 				task = self._task_get()
-				if (task == None): del(AbstractLrtHook.context_queues[self.context_id])
+				if (task == None): del(AbstractLrtHook._context_queues[self.context_id])
 			#
 		#
 	#
@@ -165,19 +167,7 @@ Hook execution
 		raise NotImplementedException()
 	#
 
-	def _task_get(self):
-	#
-		"""
-Returns the next task from the context queue if any.
-
-:return: (mixed) Task from the same context queue
-:since:  v0.1.00
-		"""
-
-		return (None if (AbstractLrtHook.context_queues[self.context_id].empty()) else AbstractLrtHook.context_queues[self.context_id].get(False))
-	#
-
-	def start(self, task_store, tid, **kwargs):
+	def start(self, task_store, _tid, **kwargs):
 	#
 		"""
 Starts the execution of this hook asynchronously.
@@ -187,23 +177,23 @@ Starts the execution of this hook asynchronously.
 
 		is_queued = False
 
-		with AbstractLrtHook.lock:
+		with AbstractLrtHook._lock:
 		#
-			if (AbstractLrtHook.context_limit < 1): AbstractLrtHook.context_limit = Settings.get("pas_global_tasks_lrt_limit", 1)
+			if (AbstractLrtHook._context_limit < 1): AbstractLrtHook._context_limit = Settings.get("pas_global_tasks_lrt_limit", 1)
 			if (self.params == None): self.params = kwargs
 
-			if (self.context_id in AbstractLrtHook.context_queues):
+			if (self.context_id in AbstractLrtHook._context_queues):
 			#
 				if (not self.independent_scheduling):
 				#
-					AbstractLrtHook.context_queues[self.context_id].put(self, False)
+					AbstractLrtHook._context_queues[self.context_id].put(self, False)
 					is_queued = True
 				#
 			#
-			elif (len(AbstractLrtHook.context_queues) < AbstractLrtHook.context_limit):
+			elif (len(AbstractLrtHook._context_queues) < AbstractLrtHook._context_limit):
 			#
-				AbstractLrtHook.context_queues[self.context_id] = Queue()
-				AbstractLrtHook.context_queues[self.context_id].put(self, False)
+				AbstractLrtHook._context_queues[self.context_id] = Queue()
+				AbstractLrtHook._context_queues[self.context_id].put(self, False)
 
 				thread = Thread(target = self._run)
 				thread.start()
@@ -212,7 +202,19 @@ Starts the execution of this hook asynchronously.
 			#
 		#
 
-		if (not is_queued): task_store.task_add(tid, self, 10) # TODO: Setting or constant please ;)
+		if (not is_queued): task_store.add(_tid, self, 10) # TODO: Setting or constant please ;)
+	#
+
+	def _task_get(self):
+	#
+		"""
+Returns the next task from the context queue if any.
+
+:return: (mixed) Task from the same context queue
+:since:  v0.1.00
+		"""
+
+		return (None if (AbstractLrtHook._context_queues[self.context_id].empty()) else AbstractLrtHook._context_queues[self.context_id].get(False))
 	#
 #
 

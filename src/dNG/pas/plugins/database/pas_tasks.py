@@ -39,9 +39,9 @@ NOTE_END //n"""
 # pylint: disable=unused-argument
 
 from dNG.pas.module.named_loader import NamedLoader
-from dNG.pas.plugins.hooks import Hooks
+from dNG.pas.plugins.hook import Hook
 
-def plugin_database_load_all(params, last_return):
+def load_all(params, last_return = None):
 #
 	"""
 Load and register all SQLAlchemy objects to generate database tables.
@@ -57,18 +57,7 @@ Load and register all SQLAlchemy objects to generate database tables.
 	return last_return
 #
 
-def plugin_deregistration():
-#
-	"""
-Unregister plugin hooks.
-
-:since: v0.1.00
-	"""
-
-	Hooks.unregister("dNG.pas.Database.loadAll", plugin_database_load_all)
-#
-
-def plugin_registration():
+def register_plugin():
 #
 	"""
 Register plugin hooks.
@@ -76,7 +65,18 @@ Register plugin hooks.
 :since: v0.1.00
 	"""
 
-	Hooks.register("dNG.pas.Database.loadAll", plugin_database_load_all)
+	Hook.register("dNG.pas.Database.loadAll", load_all)
+#
+
+def unregister_plugin():
+#
+	"""
+Unregister plugin hooks.
+
+:since: v0.1.00
+	"""
+
+	Hook.unregister("dNG.pas.Database.loadAll", load_all)
 #
 
 ##j## EOF

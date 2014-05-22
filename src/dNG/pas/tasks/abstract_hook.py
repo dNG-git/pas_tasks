@@ -2,7 +2,7 @@
 ##j## BOF
 
 """
-dNG.pas.database.instances.Task
+dNG.pas.tasks.AbstractHook
 """
 """n// NOTE
 ----------------------------------------------------------------------------
@@ -36,21 +36,16 @@ http://www.direct-netware.de/redirect.py?licenses;gpl
 ----------------------------------------------------------------------------
 NOTE_END //n"""
 
-from sqlalchemy import Column, INT, TEXT, VARCHAR
-#from sqlalchemy.orm import relationship
-from time import time
-from uuid import uuid4 as uuid
+from dNG.pas.runtime.not_implemented_exception import NotImplementedException
 
-from dNG.pas.database.types.date_time import DateTime
-from .abstract import Abstract
-
-class Task(Abstract):
+class AbstractHook(object):
 #
 	"""
-SQLAlchemy database instance for Task.
+Hook objects are used to define and execute for example queued, long running
+tasks (LRT).
 
 :author:     direct Netware Group
-:copyright:  (C) direct Netware Group - All rights reserved
+:copyright:  direct Netware Group - All rights reserved
 :package:    pas
 :subpackage: tasks
 :since:      v0.1.00
@@ -58,69 +53,29 @@ SQLAlchemy database instance for Task.
              GNU General Public License 2
 	"""
 
-	# pylint: disable=invalid-name
+	# pylint: disable=unused-argument
 
-	__tablename__ = "{0}_task".format(Abstract.get_table_prefix())
-	"""
-SQLAlchemy table name
-	"""
-
-	id = Column(VARCHAR(32), primary_key = True)
-	"""
-tasks.id
-	"""
-	tid = Column(VARCHAR(32), index = True, server_default = "", nullable = False)
-	"""
-tasks.tid
-	"""
-	name = Column(VARCHAR(100), index = True, server_default = "", nullable = False)
-	"""
-tasks.name
-	"""
-	status = Column(INT, index = True, server_default = "96", nullable = False)
-	"""
-tasks.status = STATUS_WAITING = 96
-	"""
-	hook = Column(VARCHAR(255), index = True, server_default = "", nullable = False)
-	"""
-tasks.hook
-	"""
-	params = Column(TEXT)
-	"""
-tasks.params
-	"""
-	time_started = Column(DateTime, default = 0, nullable = False)
-	"""
-tasks.time_started
-	"""
-	time_scheduled = Column(DateTime, default = 0, nullable = False)
-	"""
-tasks.time_scheduled
-	"""
-	time_updated = Column(DateTime, default = 0, nullable = False)
-	"""
-tasks.time_updated
-	"""
-	timeout = Column(DateTime, default = 0, nullable = False)
-	"""
-tasks.timeout
-	"""
-
-	def __init__(self, *args, **kwargs):
+	def run(self, task_store, tid, **params):
 	#
 		"""
-Constructor __init__(UserProfile)
+Starts the execution of this hook synchronously.
+
+:return: (mixed) Task result
+:since:  v0.1.00
+		"""
+
+		raise NotImplementedException()
+	#
+
+	def start(self, task_store, tid, **params):
+	#
+		"""
+Starts the execution of this hook asynchronously.
 
 :since: v0.1.00
 		"""
 
-		Abstract.__init__(self, *args, **kwargs)
-
-		if (self.id == None): self.id = uuid().hex
-
-		timestamp = int(time())
-		if (self.time_started == None): self.time_started = timestamp
-		if (self.time_updated == None): self.time_updated = timestamp
+		raise NotImplementedException()
 	#
 #
 

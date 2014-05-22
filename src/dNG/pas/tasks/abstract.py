@@ -41,8 +41,7 @@ from dNG.pas.runtime.not_implemented_exception import NotImplementedException
 class Abstract(object):
 #
 	"""
-Hook objects are used to define and execute for example queued, long running
-tasks (LRT).
+Tasks are executed with the "run()" method.
 
 :author:     direct Netware Group
 :copyright:  direct Netware Group - All rights reserved
@@ -53,26 +52,13 @@ tasks (LRT).
              GNU General Public License 2
 	"""
 
-	# pylint: disable=unused-argument
-
-	def run(self, task_store, tid, **params):
+	def run(self):
 	#
 		"""
-Starts the execution of this hook synchronously.
+Starts the execution of this task.
 
 :return: (mixed) Task result
 :since:  v0.1.00
-		"""
-
-		return None
-	#
-
-	def start(self, task_store, tid, **params):
-	#
-		"""
-Starts the execution of this hook asynchronously.
-
-:since: v0.1.00
 		"""
 
 		raise NotImplementedException()

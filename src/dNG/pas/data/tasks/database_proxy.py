@@ -40,7 +40,9 @@ from weakref import ref
 
 from dNG.pas.data.settings import Settings
 from dNG.pas.net.bus.client import Client
+from dNG.pas.plugins.hook import Hook
 from dNG.pas.runtime.instance_lock import InstanceLock
+from dNG.pas.runtime.operation_not_supported_exception import OperationNotSupportedException
 from .abstract import Abstract
 from .database import Database
 
@@ -58,11 +60,11 @@ The task proxy forwards tasks to a background daemon executing it.
              GNU General Public License 2
 	"""
 
-	lock = InstanceLock()
+	_lock = InstanceLock()
 	"""
 Thread safety lock
 	"""
-	weakref_instance = None
+	_weakref_instance = None
 	"""
 Tasks weakref instance
 	"""
@@ -118,6 +120,52 @@ Closes an active bus connection.
 		if (self.client != None): self.client.disconnect()
 	#
 
+	def add(self, tid, hook, timeout = None, **kwargs):
+	#
+		"""
+Add a new task with the given TID to the storage for later activation.
+
+:param tid: Task ID
+:param hook: Task hook to be called
+:param timeout: Timeout in seconds; None to use global task timeout
+
+:since: v0.1.00
+		"""
+
+		self.connect()
+		self.client.request("dNG.pas.tasks.Database.add", tid = tid, hook = hook, timeout = timeout, kwargs = kwargs)
+	#
+
+	def call(self, params = None, last_return = None):
+	#
+		"""
+Called to initiate a task if its known and valid.
+
+:param params: Parameter specified
+:param last_return: The return value from the last hook called.
+
+:return: (mixed) Task result; None if not matched
+:since:  v0.1.00
+		"""
+
+		self.connect()
+		return self.client.request("dNG.pas.tasks.Database.call", params = params, last_return = last_return)
+	#
+
+	def get(self, tid):
+	#
+		"""
+Returns the task for the given TID.
+
+:param tid: Task ID
+
+:return: (dict) Task definition
+:since:  v0.1.00
+		"""
+
+		raise OperationNotSupportedException()
+	#
+
 	def is_registered(self, tid, hook = None):
 	#
 		"""
@@ -134,69 +182,7 @@ Checks if a given task ID is known.
 		return (True if (self.client.request("dNG.pas.tasks.Database.isRegistered", tid = tid, hook = hook) == True) else False)
 	#
 
-	def task_add(self, tid, hook, timeout = None, **kwargs):
-	#
-		"""
-Add a new task with the given TID to the storage for later activation.
-
-:param tid: Task ID
-:param hook: Task hook to be called
-:param timeout: Timeout in seconds; None to use global task timeout
-
-:since: v0.1.00
-		"""
-
-		self.connect()
-		self.client.request("dNG.pas.tasks.Database.taskAdd", tid = tid, hook = hook, timeout = timeout, kwargs = kwargs)
-	#
-
-	def task_call(self, params = None, last_return = None):
-	#
-		"""
-Called to initiate a task if its known and valid.
-
-:param params: Parameter specified
-:param last_return: The return value from the last hook called.
-
-:return: (mixed) Task result; None if not matched
-:since:  v0.1.00
-		"""
-
-		self.connect()
-		return self.client.request("dNG.pas.tasks.Database.taskCall", params = params, last_return = last_return)
-	#
-
-	def task_get(self, tid):
-	#
-		"""
-Returns the task for the given TID.
-
-:param tid: Task ID
-
-:return: (dict) Task definition
-:since:  v0.1.00
-		"""
-
-		self.connect()
-		return self.client.request("dNG.pas.tasks.Database.taskGet", tid = tid)
-	#
-
-	def task_remove(self, tid):
-	#
-		"""
-Removes the given TID from the storage.
-
-:param tid: Task ID
-
-:return: (bool) True on success
-:since:  v0.1.00
-		"""
-
-		self.connect()
-		return self.client.request("dNG.pas.tasks.Database.taskRemove", tid = tid)
-	#
-
-	def timeout_register(self, tid, hook, timeout = None, **kwargs):
+	def register_timeout(self, tid, hook, timeout = None, **kwargs):
 	#
 		"""
 Registers a new task with the given TID to the storage for later use.
@@ -209,10 +195,25 @@ Registers a new task with the given TID to the storage for later use.
 		"""
 
 		self.connect()
-		self.client.request("dNG.pas.tasks.Database.timeoutRegister", tid = tid, hook = hook, timeout = timeout, kwargs = kwargs)
+		self.client.request("dNG.pas.tasks.Database.registerTimeout", tid = tid, hook = hook, timeout = timeout, kwargs = kwargs)
 	#
 
-	def timeout_reregister(self, tid):
+	def remove(self, tid):
+	#
+		"""
+Removes the given TID from the storage.
+
+:param tid: Task ID
+
+:return: (bool) True on success
+:since:  v0.1.00
+		"""
+
+		self.connect()
+		return self.client.request("dNG.pas.tasks.Database.remove", tid = tid)
+	#
+
+	def reregister_timeout(self, tid):
 	#
 		"""
 Updates the task with the given TID to push its expiration time.
@@ -222,10 +223,10 @@ Updates the task with the given TID to push its expiration time.
 		"""
 
 		self.connect()
-		return self.client.request("dNG.pas.tasks.Database.timeoutReregister", tid = tid)
+		return self.client.request("dNG.pas.tasks.Database.reregisterTimeout", tid = tid)
 	#
 
-	def timeout_unregister(self, tid):
+	def unregister_timeout(self, tid):
 	#
 		"""
 Removes the given TID from the storage.
@@ -235,29 +236,7 @@ Removes the given TID from the storage.
 		"""
 
 		self.connect()
-		return self.client.request("dNG.pas.tasks.Database.timeoutUnregister", tid = tid)
-	#
-
-	@staticmethod
-	def is_available():
-	#
-		"""
-True if a database tasks instance is available.
-
-:return: (bool) True if available
-:since:  v0.1.00
-		"""
-
-		_return = Database.get_instance().is_started()
-
-		if (not _return):
-		#
-				settings_filepath = "{0}/settings/pas_tasks_daemon.json".format(Settings.get("path_data"))
-				if (not Settings.is_file_known(settings_filepath)): Settings.read_file(settings_filepath)
-				_return = Settings.is_defined("pas_tasks_daemon_listener_address")
-		#
-
-		return _return
+		return self.client.request("dNG.pas.tasks.Database.unregisterTimeout", tid = tid)
 	#
 
 	@staticmethod
@@ -286,15 +265,38 @@ Get the DatabaseProxy singleton.
 
 		_return = None
 
-		with DatabaseProxy.lock:
+		with DatabaseProxy._lock:
 		#
-			if (DatabaseProxy.weakref_instance != None): _return = DatabaseProxy.weakref_instance()
+			if (DatabaseProxy._weakref_instance == None): Hook.load("tasks")
+			else: _return = DatabaseProxy._weakref_instance()
 
 			if (_return == None):
 			#
 				_return = DatabaseProxy()
-				DatabaseProxy.weakref_instance = ref(_return)
+				DatabaseProxy._weakref_instance = ref(_return)
 			#
+		#
+
+		return _return
+	#
+
+	@staticmethod
+	def is_available():
+	#
+		"""
+True if a database tasks instance is available.
+
+:return: (bool) True if available
+:since:  v0.1.00
+		"""
+
+		_return = Database.get_instance().is_started()
+
+		if (not _return):
+		#
+			settings_filepath = "{0}/settings/pas_tasks_daemon.json".format(Settings.get("path_data"))
+			if (not Settings.is_file_known(settings_filepath)): Settings.read_file(settings_filepath)
+			_return = Settings.is_defined("pas_tasks_daemon_listener_address")
 		#
 
 		return _return

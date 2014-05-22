@@ -55,6 +55,8 @@ The callback task can be used if the the task store is memory based.
              GNU General Public License 2
 	"""
 
+	# pylint: disable=unused-argument
+
 	def __init__(self, callback):
 	#
 		"""
@@ -71,7 +73,7 @@ Python callback
 		"""
 	#
 
-	def run(self, task_store, tid, **kwargs):
+	def run(self, task_store, _tid, **kwargs):
 	#
 		"""
 Starts the execution of this hook synchronously.
@@ -88,7 +90,7 @@ Starts the execution of this hook synchronously.
 		#
 	#
 
-	def start(self, task_store, tid, **kwargs):
+	def start(self, task_store, _tid, **kwargs):
 	#
 		"""
 Starts the execution of this hook asynchronously.
@@ -96,7 +98,7 @@ Starts the execution of this hook asynchronously.
 :since: v0.1.00
 		"""
 
-		thread = Thread(target = self.run, args = ( task_store, tid ), kwargs = kwargs)
+		thread = Thread(target = self.run, args = ( task_store, _tid ), kwargs = kwargs)
 		thread.start()
 	#
 #

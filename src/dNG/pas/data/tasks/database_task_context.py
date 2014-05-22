@@ -2,7 +2,7 @@
 ##j## BOF
 
 """
-dNG.pas.database.instances.Task
+dNG.pas.data.tasks.DatabaseTaskContext
 """
 """n// NOTE
 ----------------------------------------------------------------------------
@@ -36,21 +36,15 @@ http://www.direct-netware.de/redirect.py?licenses;gpl
 ----------------------------------------------------------------------------
 NOTE_END //n"""
 
-from sqlalchemy import Column, INT, TEXT, VARCHAR
-#from sqlalchemy.orm import relationship
-from time import time
-from uuid import uuid4 as uuid
+from .database_task import DatabaseTask
 
-from dNG.pas.database.types.date_time import DateTime
-from .abstract import Abstract
-
-class Task(Abstract):
+class DatabaseTaskContext(object):
 #
 	"""
-SQLAlchemy database instance for Task.
+A "Database" instance stores tasks in the database.
 
 :author:     direct Netware Group
-:copyright:  (C) direct Netware Group - All rights reserved
+:copyright:  direct Netware Group - All rights reserved
 :package:    pas
 :subpackage: tasks
 :since:      v0.1.00
@@ -58,69 +52,62 @@ SQLAlchemy database instance for Task.
              GNU General Public License 2
 	"""
 
-	# pylint: disable=invalid-name
-
-	__tablename__ = "{0}_task".format(Abstract.get_table_prefix())
-	"""
-SQLAlchemy table name
-	"""
-
-	id = Column(VARCHAR(32), primary_key = True)
-	"""
-tasks.id
-	"""
-	tid = Column(VARCHAR(32), index = True, server_default = "", nullable = False)
-	"""
-tasks.tid
-	"""
-	name = Column(VARCHAR(100), index = True, server_default = "", nullable = False)
-	"""
-tasks.name
-	"""
-	status = Column(INT, index = True, server_default = "96", nullable = False)
-	"""
-tasks.status = STATUS_WAITING = 96
-	"""
-	hook = Column(VARCHAR(255), index = True, server_default = "", nullable = False)
-	"""
-tasks.hook
-	"""
-	params = Column(TEXT)
-	"""
-tasks.params
-	"""
-	time_started = Column(DateTime, default = 0, nullable = False)
-	"""
-tasks.time_started
-	"""
-	time_scheduled = Column(DateTime, default = 0, nullable = False)
-	"""
-tasks.time_scheduled
-	"""
-	time_updated = Column(DateTime, default = 0, nullable = False)
-	"""
-tasks.time_updated
-	"""
-	timeout = Column(DateTime, default = 0, nullable = False)
-	"""
-tasks.timeout
-	"""
-
-	def __init__(self, *args, **kwargs):
+	def __init__(self, task):
 	#
 		"""
-Constructor __init__(UserProfile)
+Constructor __init__(DatabaseTaskContext)
+
+:param task: Database task
 
 :since: v0.1.00
 		"""
 
-		Abstract.__init__(self, *args, **kwargs)
+		self.task = task
+		"""
+Database task
+		"""
+	#
 
-		if (self.id == None): self.id = uuid().hex
+	def __enter__(self):
+	#
+		"""
+python.org: Enter the runtime context related to this object.
 
-		timestamp = int(time())
-		if (self.time_started == None): self.time_started = timestamp
-		if (self.time_updated == None): self.time_updated = timestamp
+:since: v0.1.00
+		"""
+
+		try:
+		#
+			self.task.set_status(DatabaseTask.STATUS_RUNNING)
+			self.task.save()
+		#
+		except Exception:
+		#
+			self.task.set_status(DatabaseTask.STATUS_FAILED)
+			self.task.save()
+
+			raise
+		#
+	#
+
+	def __exit__(self, exc_type, exc_value, traceback):
+	#
+		"""
+python.org: Exit the runtime context related to this object.
+
+:since: v0.1.00
+		"""
+
+		if (exc_type != None or exc_value != None): self.task.set_status(DatabaseTask.STATUS_FAILED)
+		elif (self.task.get_status() == DatabaseTask.STATUS_RUNNING):
+		#
+			self.task.set_status(DatabaseTask.STATUS_WAITING
+			                     if (self.task.is_timeout_set()) else
+			                     DatabaseTask.STATUS_COMPLETED
+			                    )
+		#
+
+		self.task.save()
 	#
 #
 

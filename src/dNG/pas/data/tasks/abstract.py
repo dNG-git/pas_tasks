@@ -38,11 +38,11 @@ NOTE_END //n"""
 
 from dNG.pas.data.settings import Settings
 from dNG.pas.module.named_loader import NamedLoader
-from dNG.pas.plugins.hooks import Hooks
+from dNG.pas.plugins.hook import Hook
 from dNG.pas.runtime.not_implemented_exception import NotImplementedException
 from dNG.pas.runtime.thread import Thread
 from dNG.pas.runtime.value_exception import ValueException
-from dNG.pas.tasks.abstract import Abstract as AbstractTask
+from dNG.pas.tasks.abstract_hook import AbstractHook
 
 class Abstract(object):
 #
@@ -79,22 +79,7 @@ Default timeout for an activated task
 		"""
 	#
 
-	def is_registered(self, tid, hook = None):
-	#
-		"""
-Checks if a given task ID is known.
-
-:param tid: Task ID
-:param hook: Task hook to be called
-
-:return: (bool) True if defined
-:since:  v0.1.00
-		"""
-
-		raise NotImplementedException()
-	#
-
-	def task_add(self, tid, hook, timeout = None, **kwargs):
+	def add(self, tid, hook, timeout = None, **kwargs):
 	#
 		"""
 Add a new task with the given TID to the storage for later activation.
@@ -109,7 +94,7 @@ Add a new task with the given TID to the storage for later activation.
 		raise NotImplementedException()
 	#
 
-	def task_call(self, params, last_return = None):
+	def call(self, params, last_return = None):
 	#
 		"""
 Called to initiate a task if its known and valid. A task is only executed
@@ -126,22 +111,30 @@ if "last_return" is None.
 
 		if (_return == None and "tid" in params):
 		#
-			task = self.task_get(params['tid'])
+			task = self.get(params['tid'])
 
 			if (task == None): is_valid = False
-			else: is_valid = (True if ("client" not in task['params'] or ("client" in params and params['client'] == task['params']['client'])) else False)
+			else:
+			#
+				is_valid = (True
+				            if ("client" not in task['params']
+				                or ("client" in params and params['client'] == task['params']['client'])
+				               )
+				            else False
+				           )
+			#
 
 			if (is_valid):
 			#
-				if ("timeout" in task): self.timeout_reregister(params['tid'])
-				_return = self._task_run(task)
+				if ("_timeout" in task): self.reregister_timeout(params['tid'])
+				_return = self._run_task(task)
 			#
 		#
 
 		return _return
 	#
 
-	def task_get(self, tid):
+	def get(self, tid):
 	#
 		"""
 Returns the task for the given TID.
@@ -155,62 +148,22 @@ Returns the task for the given TID.
 		raise NotImplementedException()
 	#
 
-	def task_remove(self, tid):
+	def is_registered(self, tid, hook = None):
 	#
 		"""
-Removes the given TID from the storage.
+Checks if a given task ID is known.
 
 :param tid: Task ID
+:param hook: Task hook to be called
 
-:return: (bool) True on success
+:return: (bool) True if defined
 :since:  v0.1.00
 		"""
 
 		raise NotImplementedException()
 	#
 
-	def _task_run(self, task_data):
-	#
-		"""
-Executes a task synchronously.
-
-:param task_data: Task definition
-
-:return: (mixed) Task result
-:since:  v0.1.00
-		"""
-
-		_return = None
-
-		if ("hook" not in task_data or "params" not in task_data): raise ValueException("Given task is unsupported")
-
-		if (isinstance(task_data['hook'], AbstractTask)): _return = task_data['hook'].run(self, **task_data['params'])
-		else: _return = Hooks.call(task_data['hook'], **task_data['params'])
-
-		return _return
-	#
-
-	def _task_start(self, task_data):
-	#
-		"""
-Calls a task asynchronously.
-
-:param task_data: Task definition
-
-:since: v0.1.00
-		"""
-
-		if ("hook" not in task_data or "params" not in task_data): raise ValueException("Given task is unsupported")
-
-		if (isinstance(task_data['hook'], AbstractTask)): task_data['hook'].start(self, **task_data['params'])
-		else:
-		#
-			thread = Thread(target = self._task_run, args = ( task_data, ))
-			thread.start()
-		#
-	#
-
-	def timeout_register(self, tid, hook, timeout = None, **params):
+	def register_timeout(self, tid, hook, timeout = None, **params):
 	#
 		"""
 Registers a new task with the given TID to the storage for later use.
@@ -225,7 +178,21 @@ Registers a new task with the given TID to the storage for later use.
 		raise NotImplementedException()
 	#
 
-	def timeout_reregister(self, tid):
+	def remove(self, tid):
+	#
+		"""
+Removes the given TID from the storage.
+
+:param tid: Task ID
+
+:return: (bool) True on success
+:since:  v0.1.00
+		"""
+
+		raise NotImplementedException()
+	#
+
+	def reregister_timeout(self, tid):
 	#
 		"""
 Updates the task with the given TID to push its expiration time.
@@ -237,7 +204,48 @@ Updates the task with the given TID to push its expiration time.
 		raise NotImplementedException()
 	#
 
-	def timeout_unregister(self, tid):
+	def _run_task(self, task_data):
+	#
+		"""
+Executes a task synchronously.
+
+:param task_data: Task definition
+
+:return: (mixed) Task result
+:since:  v0.1.00
+		"""
+
+		_return = None
+
+		if ("hook" not in task_data or "params" not in task_data): raise ValueException("Given task is unsupported")
+
+		if (isinstance(task_data['hook'], AbstractHook)): _return = task_data['hook'].run(self, **task_data['params'])
+		else: _return = Hook.call_one(task_data['hook'], **task_data['params'])
+
+		return _return
+	#
+
+	def _start_task(self, task_data):
+	#
+		"""
+Calls a task asynchronously.
+
+:param task_data: Task definition
+
+:since: v0.1.00
+		"""
+
+		if ("hook" not in task_data or "params" not in task_data): raise ValueException("Given task is unsupported")
+
+		if (isinstance(task_data['hook'], AbstractHook)): task_data['hook'].start(self, **task_data['params'])
+		else:
+		#
+			thread = Thread(target = self._run_task, args = ( task_data, ))
+			thread.start()
+		#
+	#
+
+	def unregister_timeout(self, tid):
 	#
 		"""
 Removes the given TID from the storage.
