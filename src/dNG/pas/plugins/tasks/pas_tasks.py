@@ -64,7 +64,7 @@ Called for "dNG.pas.tasks.Database.add"
 	     ): raise ValueException("Missing required arguments")
 	else:
 	#
-		kwargs = (params['kwargs'] if ("kwargs" in params) else { })
+		kwargs = params.get("kwargs", { })
 		DatabaseTasks.get_instance().add(params['tid'], params['hook'], params['timeout'], **kwargs)
 		_return = True
 	#
@@ -111,7 +111,7 @@ Called for "dNG.pas.tasks.Database.call"
 	elif ("params" not in params): raise ValueException("Missing required argument")
 	else:
 	#
-		chained_last_return = (params['last_return'] if ("last_return" in params) else None)
+		chained_last_return = params.get("last_return")
 		_return = DatabaseTasks.get_instance().call(params['params'], chained_last_return)
 	#
 
@@ -153,7 +153,7 @@ Called for "dNG.pas.tasks.Database.isRegistered"
 	elif ("tid" not in params): raise ValueException("Missing required argument")
 	else:
 	#
-		hook = (params['hook'] if ("hook" in params) else None)
+		hook = params.get("hook")
 		_return = DatabaseTasks.get_instance().is_registered(params['tid'], hook)
 	#
 
@@ -181,7 +181,7 @@ Called for "dNG.pas.tasks.Database.registerTimeout"
 	     ): raise ValueException("Missing required arguments")
 	else:
 	#
-		kwargs = (params['kwargs'] if ("kwargs" in params) else { })
+		kwargs = params.get("kwargs", { })
 		DatabaseTasks.get_instance().register_timeout(params['tid'], params['hook'], params['timeout'], **kwargs)
 		_return = True
 	#

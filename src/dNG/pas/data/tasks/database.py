@@ -360,7 +360,7 @@ Executes a task synchronously.
 
 		_return = None
 
-		if ("_task" in task_data and isinstance(task_data['_task'], DatabaseTask)):
+		if (isinstance(task_data.get("_task"), DatabaseTask)):
 		#
 			task_context = DatabaseTaskContext(task_data['_task'])
 			with task_context: _return = Abstract._run_task(self, task_data)
