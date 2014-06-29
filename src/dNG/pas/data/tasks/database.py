@@ -2,10 +2,6 @@
 ##j## BOF
 
 """
-dNG.pas.data.tasks.Database
-"""
-"""n// NOTE
-----------------------------------------------------------------------------
 direct PAS
 Python Application Services
 ----------------------------------------------------------------------------
@@ -33,15 +29,13 @@ http://www.direct-netware.de/redirect.py?licenses;gpl
 ----------------------------------------------------------------------------
 #echo(pasTasksVersion)#
 #echo(__FILEPATH__)#
-----------------------------------------------------------------------------
-NOTE_END //n"""
+"""
 
 from time import time
 from weakref import ref
 
 from dNG.pas.database.connection import Connection
 from dNG.pas.database.nothing_matched_exception import NothingMatchedException
-from dNG.pas.plugins.hook import Hook
 from dNG.pas.runtime.thread_lock import ThreadLock
 from dNG.pas.tasks.abstract_timed import AbstractTimed
 from .abstract import Abstract
@@ -100,7 +94,7 @@ Add a new task with the given TID to the storage for later activation.
 
 		params = kwargs
 		self._insert(tid, hook, params, timestamp)
-		if (self.log_handler != None): self.log_handler.debug("pas.Tasks registered TID '{0}' with target '{1!r}'".format(tid, hook))
+		if (self.log_handler != None): self.log_handler.debug("{0!r} registered TID '{1}' with target '{2!r}'", self, tid, hook, context = "pas_tasks")
 	#
 
 	def call(self, params, last_return = None):
@@ -256,7 +250,7 @@ Registers a new task with the given TID to the storage for later use.
 		params = kwargs
 		params['_timeout'] = timeout
 		self._insert(tid, hook, params, timeout = timeout_time)
-		if (self.log_handler != None): self.log_handler.debug("pas.Tasks registered TID '{0}' with target '{1!r}'".format(tid, hook))
+		if (self.log_handler != None): self.log_handler.debug("{0!r} registered TID '{1}' with target '{2!r}'", self, tid, hook, context = "pas_tasks")
 	#
 
 	def remove(self, tid):
@@ -281,7 +275,7 @@ Removes the given TID from the storage.
 		#
 		except NothingMatchedException: pass
 
-		if (_return and self.log_handler != None): self.log_handler.debug("pas.Tasks removed TID '{0}'".format(tid))
+		if (_return and self.log_handler != None): self.log_handler.debug("{0!r} removed TID '{1}'", self, tid, context = "pas_tasks")
 		return _return
 	#
 
@@ -390,7 +384,7 @@ Removes the given TID from the storage.
 		#
 		except NothingMatchedException: pass
 
-		if (_return and self.log_handler != None): self.log_handler.debug("pas.Tasks removed TID '{0}'".format(tid))
+		if (_return and self.log_handler != None): self.log_handler.debug("{0!r} removed TID '{1}'", self, tid, context = "pas_tasks")
 		return _return
 	#
 
@@ -408,8 +402,7 @@ Get the Database singleton.
 
 		with Database._lock:
 		#
-			if (Database._weakref_instance == None): Hook.load("tasks")
-			else: _return = Database._weakref_instance()
+			if (Database._weakref_instance != None): _return = Database._weakref_instance()
 
 			if (_return == None):
 			#

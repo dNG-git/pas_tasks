@@ -2,10 +2,6 @@
 ##j## BOF
 
 """
-dNG.pas.tasks.AbstractLrtHook
-"""
-"""n// NOTE
-----------------------------------------------------------------------------
 direct PAS
 Python Application Services
 ----------------------------------------------------------------------------
@@ -33,8 +29,7 @@ http://www.direct-netware.de/redirect.py?licenses;gpl
 ----------------------------------------------------------------------------
 #echo(pasTasksVersion)#
 #echo(__FILEPATH__)#
-----------------------------------------------------------------------------
-NOTE_END //n"""
+"""
 
 # pylint: disable=import-error
 
@@ -143,7 +138,7 @@ Returns the manager instance responsible for this hook.
 			try: task._run_hook()
 			except Exception as handled_exception:
 			#
-				if (self.log_handler != None): self.log_handler.error(handled_exception)
+				if (self.log_handler != None): self.log_handler.error(handled_exception, context = "pas_tasks")
 			#
 
 			with AbstractLrtHook._lock:

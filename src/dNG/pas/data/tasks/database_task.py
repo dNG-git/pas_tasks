@@ -2,10 +2,6 @@
 ##j## BOF
 
 """
-dNG.pas.data.tasks.Database
-"""
-"""n// NOTE
-----------------------------------------------------------------------------
 direct PAS
 Python Application Services
 ----------------------------------------------------------------------------
@@ -33,13 +29,12 @@ http://www.direct-netware.de/redirect.py?licenses;gpl
 ----------------------------------------------------------------------------
 #echo(pasTasksVersion)#
 #echo(__FILEPATH__)#
-----------------------------------------------------------------------------
-NOTE_END //n"""
+"""
 
 from random import randrange
 from time import time
 
-from sqlalchemy.sql.expression import and_, asc, or_
+from sqlalchemy.sql.expression import and_, or_
 
 from dNG.data.json_resource import JsonResource
 from dNG.pas.data.binary import Binary
@@ -510,7 +505,7 @@ Load KeyStore value by key.
 			                                      _DbTask.timeout <= int(time())
 			                                     )
 			                                 )
-			                          .order_by(asc(_DbTask.time_scheduled)).first()
+			                          .order_by(_DbTask.time_scheduled.asc()).first()
 			                         )
 		#
 	#

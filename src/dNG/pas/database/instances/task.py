@@ -2,10 +2,6 @@
 ##j## BOF
 
 """
-dNG.pas.database.instances.Task
-"""
-"""n// NOTE
-----------------------------------------------------------------------------
 direct PAS
 Python Application Services
 ----------------------------------------------------------------------------
@@ -33,11 +29,10 @@ http://www.direct-netware.de/redirect.py?licenses;gpl
 ----------------------------------------------------------------------------
 #echo(pasTasksVersion)#
 #echo(__FILEPATH__)#
-----------------------------------------------------------------------------
-NOTE_END //n"""
+"""
 
-from sqlalchemy import Column, INT, TEXT, VARCHAR
-#from sqlalchemy.orm import relationship
+from sqlalchemy.schema import Column
+from sqlalchemy.types import INT, TEXT, VARCHAR
 from time import time
 from uuid import uuid4 as uuid
 

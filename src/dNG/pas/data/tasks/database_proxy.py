@@ -2,10 +2,6 @@
 ##j## BOF
 
 """
-dNG.pas.data.tasks.DatabaseProxy
-"""
-"""n// NOTE
-----------------------------------------------------------------------------
 direct PAS
 Python Application Services
 ----------------------------------------------------------------------------
@@ -33,14 +29,12 @@ http://www.direct-netware.de/redirect.py?licenses;gpl
 ----------------------------------------------------------------------------
 #echo(pasTasksVersion)#
 #echo(__FILEPATH__)#
-----------------------------------------------------------------------------
-NOTE_END //n"""
+"""
 
 from weakref import ref
 
 from dNG.pas.data.settings import Settings
 from dNG.pas.net.bus.client import Client
-from dNG.pas.plugins.hook import Hook
 from dNG.pas.runtime.instance_lock import InstanceLock
 from dNG.pas.runtime.operation_not_supported_exception import OperationNotSupportedException
 from .abstract import Abstract
@@ -267,8 +261,7 @@ Get the DatabaseProxy singleton.
 
 		with DatabaseProxy._lock:
 		#
-			if (DatabaseProxy._weakref_instance == None): Hook.load("tasks")
-			else: _return = DatabaseProxy._weakref_instance()
+			if (DatabaseProxy._weakref_instance != None): _return = DatabaseProxy._weakref_instance()
 
 			if (_return == None):
 			#

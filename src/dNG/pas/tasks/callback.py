@@ -2,10 +2,6 @@
 ##j## BOF
 
 """
-dNG.pas.tasks.Callback
-"""
-"""n// NOTE
-----------------------------------------------------------------------------
 direct PAS
 Python Application Services
 ----------------------------------------------------------------------------
@@ -33,8 +29,7 @@ http://www.direct-netware.de/redirect.py?licenses;gpl
 ----------------------------------------------------------------------------
 #echo(pasTasksVersion)#
 #echo(__FILEPATH__)#
-----------------------------------------------------------------------------
-NOTE_END //n"""
+"""
 
 from threading import Thread
 
@@ -85,7 +80,7 @@ Starts the execution of this hook synchronously.
 		try: return self.callback(**kwargs)
 		except Exception as handled_exception:
 		#
-			LogLine.error(handled_exception)
+			LogLine.error(handled_exception, context = "pas_tasks")
 			raise
 		#
 	#
