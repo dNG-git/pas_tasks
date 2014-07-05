@@ -480,7 +480,7 @@ Load KeyStore value by ID.
 :since:  v0.1.00
 		"""
 
-		with Connection.get_instance() as database: return DatabaseTask._load(database.query(_DbTask).filter(_DbTask.id == _id).first())
+		with Connection.get_instance() as database: return DatabaseTask._load(database.query(_DbTask).get(_id))
 	#
 
 	@staticmethod
