@@ -441,6 +441,9 @@ Load DatabaseTask entry from database.
 		#
 			with Connection.get_instance() as database:
 			#
+				_return = DatabaseTask(db_instance)
+				if (_return.is_timed_out()): _return = None
+
 				if ((not Settings.get("pas_database_auto_maintenance", False)) and randrange(0, 3) < 1):
 				#
 					archive_timeout = int(Settings.get("pas_tasks_database_tasks_archive_timeout", 28)) * 86400
@@ -458,9 +461,6 @@ Load DatabaseTask entry from database.
 					    .delete() > 0
 					   ): database.optimize_random(_DbTask)
 				#
-
-				_return = DatabaseTask(db_instance)
-				if (_return.is_timed_out()): _return = None
 			#
 		#
 
@@ -502,7 +502,7 @@ Load KeyStore value by key.
 			return DatabaseTask._load(database.query(_DbTask)
 			                          .filter(_DbTask.status == status,
 			                                  or_(_DbTask.timeout == 0,
-			                                      _DbTask.timeout <= int(time())
+			                                      _DbTask.timeout >= int(time())
 			                                     )
 			                                 )
 			                          .order_by(_DbTask.time_scheduled.asc()).first()
