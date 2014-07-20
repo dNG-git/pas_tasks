@@ -524,6 +524,21 @@ Load KeyStore value by ID.
 
 		with Connection.get_instance() as database: return DatabaseTask._load(database.query(_DbTask).filter(_DbTask.tid == Md5.hash(tid)).limit(1).first())
 	#
+
+	@staticmethod
+	def _reset_stale_running():
+	#
+		"""
+Resets all stale tasks with the "running" status.
+
+:since:  v0.1.00
+		"""
+
+		with Connection.get_instance() as database:
+		#
+			database.query(_DbTask).filter(_DbTask.status == DatabaseTask.STATUS_RUNNING).update({ "status": DatabaseTask.STATUS_WAITING })
+		#
+	#
 #
 
 ##j## EOF

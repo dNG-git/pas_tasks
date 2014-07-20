@@ -94,7 +94,7 @@ Add a new task with the given TID to the storage for later activation.
 
 		params = kwargs
 		self._insert(tid, hook, params, timestamp)
-		if (self.log_handler != None): self.log_handler.debug("{0!r} registered TID '{1}' with target '{2!r}'", self, tid, hook, context = "pas_tasks")
+		if (self.log_handler != None): self.log_handler.debug("{0!r} registered TID '{1}' with target {2!r}", self, tid, hook, context = "pas_tasks")
 	#
 
 	def call(self, params, last_return = None):
@@ -250,7 +250,7 @@ Registers a new task with the given TID to the storage for later use.
 		params = kwargs
 		params['_timeout'] = timeout
 		self._insert(tid, hook, params, timeout = timeout_time)
-		if (self.log_handler != None): self.log_handler.debug("{0!r} registered TID '{1}' with target '{2!r}'", self, tid, hook, context = "pas_tasks")
+		if (self.log_handler != None): self.log_handler.debug("{0!r} registered TID '{1}' with target {2!r}", self, tid, hook, context = "pas_tasks")
 	#
 
 	def remove(self, tid):
@@ -362,6 +362,21 @@ Executes a task synchronously.
 		else: _return = Abstract._run_task(self, task_data)
 
 		return _return
+	#
+
+	def start(self, params = None, last_return = None):
+	#
+		"""
+Starts the database tasks scheduler.
+
+:param params: Parameter specified
+:param last_return: The return value from the last hook called.
+
+:since: v0.1.00
+		"""
+
+		DatabaseTask._reset_stale_running()
+		AbstractTimed.start(self, params, last_return)
 	#
 
 	def unregister_timeout(self, tid):
