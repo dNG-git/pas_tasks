@@ -505,7 +505,8 @@ Load KeyStore value by key.
 			                                      _DbTask.timeout >= int(time())
 			                                     )
 			                                 )
-			                          .order_by(_DbTask.time_scheduled.asc()).first()
+			                          .order_by(_DbTask.time_scheduled.asc())
+			                          .first()
 			                         )
 		#
 	#

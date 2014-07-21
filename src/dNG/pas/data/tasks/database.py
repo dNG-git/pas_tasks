@@ -35,6 +35,7 @@ from time import time
 from weakref import ref
 
 from dNG.pas.database.connection import Connection
+from dNG.pas.database.transaction_context import TransactionContext
 from dNG.pas.database.nothing_matched_exception import NothingMatchedException
 from dNG.pas.runtime.thread_lock import ThreadLock
 from dNG.pas.tasks.abstract_timed import AbstractTimed
@@ -186,7 +187,7 @@ Add a new task with the given TID to the storage for later activation.
 
 		if (self.timer_active):
 		#
-			with Connection.get_instance():
+			with TransactionContext():
 			#
 				task = DatabaseTask()
 				task.set_tid(tid)
@@ -316,7 +317,7 @@ Timed task execution
 :since: v0.1.00
 		"""
 
-		with Connection.get_instance(), Database._lock:
+		with TransactionContext(), Database._lock:
 		#
 			task_data = None
 
