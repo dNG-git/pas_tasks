@@ -116,10 +116,9 @@ if "last_return" is None.
 		if (_return == None and "tid" in params):
 		#
 			task = self.get(params['tid'])
+			task_status = (DatabaseTask.STATUS_UNKNOWN if (task == None) else task['_task'].get_status())
 
-			if (task != None
-			    and task['_task'].get_status() == DatabaseTask.STATUS_WAITING
-			   ): _return = Abstract.call(self, params)
+			if (task_status == DatabaseTask.STATUS_WAITING): _return = Abstract.call(self, params)
 		#
 
 		return _return
@@ -299,9 +298,9 @@ Updates the task with the given TID to push its expiration time.
 			if ("_timeout" in params):
 			#
 				task.set_timeout(time() + params['_timeout'])
-				_return = True
+				task.save()
 
-				if (self.timer_timeout < 0 or self.timer_timeout > params['_timeout']): self.update_timestamp()
+				_return = True
 			#
 		#
 		except NothingMatchedException: pass
@@ -319,23 +318,22 @@ Timed task execution
 
 		with TransactionContext(), Database._lock:
 		#
+			task = None
 			task_data = None
 
-			try:
+			try: task = DatabaseTask.load_next()
+			except NothingMatchedException: pass
+
+			if (task != None):
 			#
-				task = DatabaseTask.load_next()
 				task.set_status(DatabaseTask.STATUS_QUEUED)
 				task.save()
 
-				if (not task.is_timeout_set()):
-				#
-					task_data = { "hook": task.get_hook(),
-					              "params": task.get_params(),
-					              "_task": task
-					            }
-				#
+				task_data = { "hook": task.get_hook(),
+				              "params": task.get_params(),
+				              "_task": task
+				            }
 			#
-			except NothingMatchedException: pass
 
 			AbstractTimed.run(self)
 			if (task_data != None): self._start_task(task_data)

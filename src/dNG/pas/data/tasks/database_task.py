@@ -501,6 +501,7 @@ Load KeyStore value by key.
 		#
 			return DatabaseTask._load(database.query(_DbTask)
 			                          .filter(_DbTask.status == status,
+			                                  _DbTask.time_scheduled > 0,
 			                                  or_(_DbTask.timeout == 0,
 			                                      _DbTask.timeout >= int(time())
 			                                     )
@@ -523,7 +524,10 @@ Load KeyStore value by ID.
 :since:  v0.1.00
 		"""
 
-		with Connection.get_instance() as database: return DatabaseTask._load(database.query(_DbTask).filter(_DbTask.tid == Md5.hash(tid)).limit(1).first())
+		with Connection.get_instance() as database:
+		#
+			return DatabaseTask._load(database.query(_DbTask).filter(_DbTask.tid == Md5.hash(tid)).limit(1).first())
+		#
 	#
 
 	@staticmethod
@@ -537,7 +541,10 @@ Resets all stale tasks with the "running" status.
 
 		with Connection.get_instance() as database:
 		#
-			database.query(_DbTask).filter(_DbTask.status == DatabaseTask.STATUS_RUNNING).update({ "status": DatabaseTask.STATUS_WAITING })
+			database.query(_DbTask).filter(or_(_DbTask.status == DatabaseTask.STATUS_QUEUED,
+			                                   _DbTask.status == DatabaseTask.STATUS_RUNNING
+			                                  )
+			                              ).update({ "status": DatabaseTask.STATUS_WAITING })
 		#
 	#
 #
