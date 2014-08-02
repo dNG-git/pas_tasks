@@ -334,18 +334,15 @@ Sets the task hook to be called.
 		self.hook = hook
 	#
 
-	def set_name(self, name):
-	#
-		"""
+	set_name = Instance._wrap_setter("name")
+	"""
 Sets the task name.
 
-:param name: Task name
+:param value: Task name
 
 :since: v0.1.00
-		"""
+	"""
 
-		self.set_data_attributes(name = name)
-	#
 	def set_params(self, params):
 	#
 		"""
@@ -360,18 +357,14 @@ Sets the task parameter.
 		self.params = params
 	#
 
-	def set_status(self, status):
-	#
-		"""
+	set_status = Instance._wrap_setter("status")
+	"""
 Sets the task status.
 
-:param status: Task status
+:param value: Task status
 
 :since: v0.1.00
-		"""
-
-		self.set_data_attributes(status = status)
-	#
+	"""
 
 	def set_status_completed(self):
 	#
@@ -397,31 +390,23 @@ Sets the task ID.
 		self.tid = tid
 	#
 
-	def set_time_scheduled(self, timestamp):
-	#
-		"""
+	set_time_scheduled = Instance._wrap_setter("time_scheduled")
+	"""
 Sets the time the task is scheduled to be executed.
 
-:param timestamp: UNIX timestamp
+:param value: UNIX timestamp
 
 :since: v0.1.00
-		"""
+	"""
 
-		self.set_data_attributes(time_scheduled = timestamp)
-	#
-
-	def set_timeout(self, timestamp):
-	#
-		"""
+	set_timeout = Instance._wrap_setter("timeout")
+	"""
 Sets a timeout for the task.
 
-:param timestamp: UNIX timestamp
+:param value: UNIX timestamp
 
 :since: v0.1.00
-		"""
-
-		self.set_data_attributes(timeout = timestamp)
-	#
+	"""
 
 	@staticmethod
 	def _load(db_instance):
@@ -472,14 +457,15 @@ Load DatabaseTask entry from database.
 	def load_id(_id):
 	#
 		"""
-Load KeyStore value by ID.
+Load DatabaseTask value by entry ID.
 
-:param _id: KeyStore ID
+:param _id: Task entry ID
 
-:return: (object) KeyStore instance on success
+:return: (object) DatabaseTask instance on success
 :since:  v0.1.00
 		"""
 
+		if (_id == None): raise NothingMatchedException("Task entry ID is invalid")
 		with Connection.get_instance() as database: return DatabaseTask._load(database.query(_DbTask).get(_id))
 	#
 
@@ -487,11 +473,11 @@ Load KeyStore value by ID.
 	def load_next(status = None):
 	#
 		"""
-Load KeyStore value by key.
+Load DatabaseTask to be executed next.
 
 :param status: Task status
 
-:return: (object) KeyStore instance on success
+:return: (object) DatabaseTask instance on success
 :since:  v0.1.00
 		"""
 
@@ -516,13 +502,15 @@ Load KeyStore value by key.
 	def load_tid(tid):
 	#
 		"""
-Load KeyStore value by ID.
+Load DatabaseTask value by ID.
 
-:param tid: KeyStore ID
+:param tid: Task ID
 
-:return: (object) KeyStore instance on success
+:return: (object) DatabaseTask instance on success
 :since:  v0.1.00
 		"""
+
+		if (tid == None): raise NothingMatchedException("Task ID is invalid")
 
 		with Connection.get_instance() as database:
 		#

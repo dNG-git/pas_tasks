@@ -90,7 +90,8 @@ python.org: Enter the runtime context related to this object.
 		"""
 python.org: Exit the runtime context related to this object.
 
-:since: v0.1.00
+:return: (bool) True to suppress exceptions
+:since:  v0.1.00
 		"""
 
 		if (exc_type != None or exc_value != None): self.task.set_status(DatabaseTask.STATUS_FAILED)
@@ -103,6 +104,7 @@ python.org: Exit the runtime context related to this object.
 		#
 
 		self.task.save()
+		return False
 	#
 #
 

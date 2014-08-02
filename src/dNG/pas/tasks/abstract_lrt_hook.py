@@ -40,6 +40,7 @@ except ImportError: from Queue import Queue
 
 from dNG.pas.data.settings import Settings
 from dNG.pas.module.named_loader import NamedLoader
+from dNG.pas.runtime.exception_log_trap import ExceptionLogTrap
 from dNG.pas.runtime.not_implemented_exception import NotImplementedException
 from dNG.pas.runtime.thread_lock import ThreadLock
 from .abstract_hook import AbstractHook
@@ -129,17 +130,13 @@ Returns the manager instance responsible for this hook.
 :since:  v0.1.00
 		"""
 
-		# pylint: disable=broad-except,protected-access
+		# pylint: disable=protected-access
 
 		with AbstractLrtHook._lock: task = self._task_get()
 
 		while (task != None):
 		#
-			try: task._run_hook()
-			except Exception as handled_exception:
-			#
-				if (self.log_handler != None): self.log_handler.error(handled_exception, context = "pas_tasks")
-			#
+			with ExceptionLogTrap("pas_tasks"): task._run_hook()
 
 			with AbstractLrtHook._lock:
 			#
