@@ -36,8 +36,7 @@ from time import time
 from weakref import ref
 
 from dNG.pas.data.binary import Binary
-from dNG.pas.plugins.hook import Hook
-from dNG.pas.runtime.thread_lock import ThreadLock
+from dNG.pas.runtime.instance_lock import InstanceLock
 from dNG.pas.tasks.abstract_timed import AbstractTimed
 from .abstract import Abstract
 
@@ -57,7 +56,7 @@ ones.
              GNU General Public License 2
 	"""
 
-	_lock = ThreadLock()
+	_instance_lock = InstanceLock()
 	"""
 Thread safety lock
 	"""
@@ -118,7 +117,7 @@ Removes the given TID from the storage.
 
 		_return = False
 
-		with Memory._lock:
+		with self.lock:
 		#
 			index = len(self.tasks)
 
@@ -138,12 +137,6 @@ Removes the given TID from the storage.
 						break
 					#
 				#
-			#
-
-			if (len(self.tasks) == 0):
-			#
-				Hook.unregister("dNG.pas.Status.onShutdown", self.stop)
-				Hook.unregister("dNG.pas.tasks.call", self.call)
 			#
 		#
 
@@ -166,7 +159,7 @@ Returns the task for the given TID.
 
 		tid = Binary.str(tid)
 
-		with Memory._lock:
+		with self.lock:
 		#
 			for position in range(0, len(self.tasks)):
 			#
@@ -193,7 +186,7 @@ Get the implementation specific next "run()" UNIX timestamp.
 
 		_return = -1
 
-		with Memory._lock:
+		with self.lock:
 		#
 			if (len(self.tasks) > 0): _return = self.tasks[0]['timestamp']
 		#
@@ -216,7 +209,7 @@ Add a new task with the given TID to the storage for later activation.
 		#
 			timestamp = int(time() + timeout)
 
-			with Memory._lock:
+			with self.lock:
 			#
 				tasks_count = len(self.tasks)
 
@@ -272,7 +265,7 @@ Checks if a given task ID is known.
 
 		_return = False
 
-		with Memory._lock:
+		with self.lock:
 		#
 			for position in range(0, len(self.tasks)):
 			#
@@ -361,10 +354,15 @@ Timed task execution
 :since: v0.1.00
 		"""
 
-		with Memory._lock:
+		task = None
+
+		if (self.timer_active):
 		#
-			task = (self.tasks.pop(0) if (len(self.tasks) > 0 and self.tasks[0]['timestamp'] <= time()) else None)
-			AbstractTimed.run(self)
+			with self.lock:
+			#
+				if (len(self.tasks) > 0 and self.tasks[0]['timestamp'] <= time()): task = self.tasks.pop(0)
+				AbstractTimed.run(self)
+			#
 		#
 
 		if (task != None):
@@ -404,7 +402,7 @@ Get the Memory singleton.
 
 		_return = None
 
-		with Memory._lock:
+		with Memory._instance_lock:
 		#
 			if (Memory._weakref_instance != None): _return = Memory._weakref_instance()
 

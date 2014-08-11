@@ -37,7 +37,7 @@ from weakref import ref
 from dNG.pas.database.connection import Connection
 from dNG.pas.database.transaction_context import TransactionContext
 from dNG.pas.database.nothing_matched_exception import NothingMatchedException
-from dNG.pas.runtime.thread_lock import ThreadLock
+from dNG.pas.runtime.instance_lock import InstanceLock
 from dNG.pas.tasks.abstract_timed import AbstractTimed
 from .abstract import Abstract
 from .database_task import DatabaseTask
@@ -57,7 +57,7 @@ A "Database" instance stores tasks in the database.
              GNU General Public License 2
 	"""
 
-	_lock = ThreadLock()
+	_instance_lock = InstanceLock()
 	"""
 Thread safety lock
 	"""
@@ -316,13 +316,16 @@ Timed task execution
 :since: v0.1.00
 		"""
 
-		with TransactionContext(), Database._lock:
+		with TransactionContext(), self.lock:
 		#
 			task = None
 			task_data = None
 
-			try: task = DatabaseTask.load_next()
-			except NothingMatchedException: pass
+			if (self.timer_active):
+			#
+				try: task = DatabaseTask.load_next()
+				except NothingMatchedException: pass
+			#
 
 			if (task != None):
 			#
@@ -414,7 +417,7 @@ Get the Database singleton.
 
 		_return = None
 
-		with Database._lock:
+		with Database._instance_lock:
 		#
 			if (Database._weakref_instance != None): _return = Database._weakref_instance()
 
