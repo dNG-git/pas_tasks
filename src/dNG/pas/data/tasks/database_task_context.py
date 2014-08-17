@@ -31,6 +31,7 @@ http://www.direct-netware.de/redirect.py?licenses;gpl
 #echo(__FILEPATH__)#
 """
 
+from dNG.pas.database.transaction_context import TransactionContext
 from .database_task import DatabaseTask
 
 class DatabaseTaskContext(object):
@@ -71,17 +72,15 @@ python.org: Enter the runtime context related to this object.
 :since: v0.1.00
 		"""
 
-		try:
+		with TransactionContext():
 		#
-			self.task.set_status(DatabaseTask.STATUS_RUNNING)
-			self.task.save()
-		#
-		except Exception:
-		#
-			self.task.set_status(DatabaseTask.STATUS_FAILED)
-			self.task.save()
-
-			raise
+			try: self.task.set_status(DatabaseTask.STATUS_RUNNING)
+			except Exception:
+			#
+				self.task.set_status(DatabaseTask.STATUS_FAILED)
+				raise
+			#
+			finally: self.task.save()
 		#
 	#
 
@@ -94,16 +93,20 @@ python.org: Exit the runtime context related to this object.
 :since:  v0.1.00
 		"""
 
-		if (exc_type != None or exc_value != None): self.task.set_status(DatabaseTask.STATUS_FAILED)
-		elif (self.task.get_status() == DatabaseTask.STATUS_RUNNING):
+		with TransactionContext():
 		#
-			self.task.set_status(DatabaseTask.STATUS_WAITING
-			                     if (self.task.is_timeout_set()) else
-			                     DatabaseTask.STATUS_COMPLETED
-			                    )
+			if (exc_type != None or exc_value != None): self.task.set_status(DatabaseTask.STATUS_FAILED)
+			elif (self.task.get_status() == DatabaseTask.STATUS_RUNNING):
+			#
+				self.task.set_status(DatabaseTask.STATUS_WAITING
+				                     if (self.task.is_timeout_set()) else
+				                     DatabaseTask.STATUS_COMPLETED
+				                    )
+			#
+
+			self.task.save()
 		#
 
-		self.task.save()
 		return False
 	#
 #

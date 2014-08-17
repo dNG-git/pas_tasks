@@ -43,6 +43,7 @@ from dNG.pas.data.text.md5 import Md5
 from dNG.pas.database.connection import Connection
 from dNG.pas.database.instance import Instance
 from dNG.pas.database.nothing_matched_exception import NothingMatchedException
+from dNG.pas.database.transaction_context import TransactionContext
 from dNG.pas.database.instances.task import Task as _DbTask
 from dNG.pas.runtime.io_exception import IOException
 from dNG.pas.runtime.type_exception import TypeException
@@ -259,15 +260,12 @@ Implementation of the reloading SQLAlchemy database instance logic.
 :since: v0.1.00
 		"""
 
-		with self._lock:
+		if (self.local.db_instance == None):
 		#
-			if (self.local.db_instance == None):
-			#
-				if (self.db_id == None): raise IOException("Database instance is not reloadable.")
-				self.local.db_instance = self._database.query(_DbTask).filter(_DbTask.id == self.db_id).one()
-			#
-			else: Instance._reload(self)
+			if (self.db_id == None): raise IOException("Database instance is not reloadable.")
+			self.local.db_instance = self.local.connection.query(_DbTask).filter(_DbTask.id == self.db_id).one()
 		#
+		else: Instance._reload(self)
 	#
 
 	def save(self):
@@ -424,27 +422,30 @@ Load DatabaseTask entry from database.
 
 		if (db_instance != None):
 		#
-			with Connection.get_instance() as database:
+			with Connection.get_instance() as connection:
 			#
 				_return = DatabaseTask(db_instance)
 				if (_return.is_timed_out()): _return = None
 
 				if ((not Settings.get("pas_database_auto_maintenance", False)) and randrange(0, 3) < 1):
 				#
-					archive_timeout = int(Settings.get("pas_tasks_database_tasks_archive_timeout", 28)) * 86400
-					timestamp = int(time())
-					timestamp_archive = timestamp - archive_timeout
+					with TransactionContext():
+					#
+						archive_timeout = int(Settings.get("pas_tasks_database_tasks_archive_timeout", 28)) * 86400
+						timestamp = int(time())
+						timestamp_archive = timestamp - archive_timeout
 
-					if (database.query(_DbTask)
-					    .filter(or_(and_(_DbTask.status == DatabaseTask.STATUS_COMPLETED,
-					                     _DbTask.time_scheduled > 0,
-					                     _DbTask.time_scheduled < timestamp_archive
-					                    ),
-					                and_(_DbTask.timeout > 0, _DbTask.timeout < timestamp)
-					               )
-					           )
-					    .delete() > 0
-					   ): database.optimize_random(_DbTask)
+						if (connection.query(_DbTask)
+						    .filter(or_(and_(_DbTask.status == DatabaseTask.STATUS_COMPLETED,
+						                     _DbTask.time_scheduled > 0,
+						                     _DbTask.time_scheduled < timestamp_archive
+						                    ),
+						                and_(_DbTask.timeout > 0, _DbTask.timeout < timestamp)
+						               )
+						           )
+						    .delete() > 0
+						   ): connection.optimize_random(_DbTask)
+					#
 				#
 			#
 		#
@@ -466,7 +467,7 @@ Load DatabaseTask value by entry ID.
 		"""
 
 		if (_id == None): raise NothingMatchedException("Task entry ID is invalid")
-		with Connection.get_instance() as database: return DatabaseTask._load(database.query(_DbTask).get(_id))
+		with Connection.get_instance() as connection: return DatabaseTask._load(connection.query(_DbTask).get(_id))
 	#
 
 	@staticmethod
@@ -483,9 +484,9 @@ Load DatabaseTask to be executed next.
 
 		if (status == None): status = DatabaseTask.STATUS_WAITING
 
-		with Connection.get_instance() as database:
+		with Connection.get_instance() as connection:
 		#
-			return DatabaseTask._load(database.query(_DbTask)
+			return DatabaseTask._load(connection.query(_DbTask)
 			                          .filter(_DbTask.status == status,
 			                                  _DbTask.time_scheduled > 0,
 			                                  or_(_DbTask.timeout == 0,
@@ -512,9 +513,9 @@ Load DatabaseTask value by ID.
 
 		if (tid == None): raise NothingMatchedException("Task ID is invalid")
 
-		with Connection.get_instance() as database:
+		with Connection.get_instance() as connection:
 		#
-			return DatabaseTask._load(database.query(_DbTask).filter(_DbTask.tid == Md5.hash(tid)).limit(1).first())
+			return DatabaseTask._load(connection.query(_DbTask).filter(_DbTask.tid == Md5.hash(tid)).limit(1).first())
 		#
 	#
 
@@ -527,12 +528,12 @@ Resets all stale tasks with the "running" status.
 :since:  v0.1.00
 		"""
 
-		with Connection.get_instance() as database:
+		with Connection.get_instance() as connection, TransactionContext():
 		#
-			database.query(_DbTask).filter(or_(_DbTask.status == DatabaseTask.STATUS_QUEUED,
-			                                   _DbTask.status == DatabaseTask.STATUS_RUNNING
-			                                  )
-			                              ).update({ "status": DatabaseTask.STATUS_WAITING })
+			connection.query(_DbTask).filter(or_(_DbTask.status == DatabaseTask.STATUS_QUEUED,
+			                                     _DbTask.status == DatabaseTask.STATUS_RUNNING
+			                                    )
+			                                ).update({ "status": DatabaseTask.STATUS_WAITING })
 		#
 	#
 #
