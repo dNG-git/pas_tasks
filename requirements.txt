@@ -1,0 +1,2 @@
+-e git+http://git.direct-netware.de/pas/database/#egg=pas_database
+-e git+http://git.direct-netware.de/pas/timed_tasks/#egg=pas_timed_tasks
