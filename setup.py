@@ -8,11 +8,24 @@ Python Application Services
 (C) direct Netware Group - All rights reserved
 https://www.direct-netware.de/redirect?pas;tasks
 
-This Source Code Form is subject to the terms of the Mozilla Public License,
-v. 2.0. If a copy of the MPL was not distributed with this file, You can
-obtain one at http://mozilla.org/MPL/2.0/.
+The following license agreement remains valid unless any additions or
+changes are being made by direct Netware Group in a written form.
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+more details.
+
+You should have received a copy of the GNU General Public License along with
+this program; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 ----------------------------------------------------------------------------
-https://www.direct-netware.de/redirect?licenses;mpl2
+https://www.direct-netware.de/redirect?licenses;gpl
 ----------------------------------------------------------------------------
 setup.py
 """
@@ -54,7 +67,7 @@ with TemporaryDirectory(dir = ".") as build_directory:
 	      long_description = """"pas_tasks" are used to schedule in-memory or database based tasks.""",
 	      author = "direct Netware Group",
 	      author_email = "web@direct-netware.de",
-	      license = "MPL2",
+	      license = "GPLv2+",
 	      url = "https://www.direct-netware.de/redirect?pas;tasks",
 
 	      package_dir = { "": _build_path },
