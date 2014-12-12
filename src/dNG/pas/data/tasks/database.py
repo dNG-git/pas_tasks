@@ -35,7 +35,6 @@ from time import time
 from weakref import ref
 
 from dNG.pas.database.connection import Connection
-from dNG.pas.database.transaction_context import TransactionContext
 from dNG.pas.database.nothing_matched_exception import NothingMatchedException
 from dNG.pas.runtime.instance_lock import InstanceLock
 from dNG.pas.tasks.abstract_timed import AbstractTimed
@@ -186,34 +185,31 @@ Add a new task with the given TID to the storage for later activation.
 
 		if (self.timer_active):
 		#
-			with TransactionContext():
+			task = DatabaseTask()
+			task.set_tid(tid)
+			task.set_name(tid)
+			task.set_hook(hook)
+			task.set_params(params)
+
+			if (time_scheduled != None):
 			#
-				task = DatabaseTask()
-				task.set_tid(tid)
-				task.set_name(tid)
-				task.set_hook(hook)
-				task.set_params(params)
-
-				if (time_scheduled != None):
-				#
-					time_scheduled = int(time_scheduled)
-					task.set_time_scheduled(time_scheduled)
-				#
-
-				if (timeout != None):
-				#
-					timeout = int(timeout)
-					task.set_timeout(timeout)
-				#
-
-				task.save()
-
-				time_to_execution = (None if (time_scheduled == None) else time_scheduled - int(time()))
-
-				if (time_to_execution != None
-				    and (self.timer_timeout < 0 or self.timer_timeout > time_to_execution)
-				   ): self.update_timestamp(time_scheduled)
+				time_scheduled = int(time_scheduled)
+				task.set_time_scheduled(time_scheduled)
 			#
+
+			if (timeout != None):
+			#
+				timeout = int(timeout)
+				task.set_timeout(timeout)
+			#
+
+			task.save()
+
+			time_to_execution = (None if (time_scheduled == None) else time_scheduled - int(time()))
+
+			if (time_to_execution != None
+			    and (self.timer_timeout < 0 or self.timer_timeout > time_to_execution)
+			   ): self.update_timestamp(time_scheduled)
 		#
 	#
 
@@ -316,7 +312,7 @@ Timed task execution
 :since: v0.1.00
 		"""
 
-		with TransactionContext(), self.lock:
+		with self.lock:
 		#
 			task = None
 			task_data = None

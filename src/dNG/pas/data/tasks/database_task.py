@@ -43,7 +43,6 @@ from dNG.pas.data.text.md5 import Md5
 from dNG.pas.database.connection import Connection
 from dNG.pas.database.instance import Instance
 from dNG.pas.database.nothing_matched_exception import NothingMatchedException
-from dNG.pas.database.transaction_context import TransactionContext
 from dNG.pas.database.instances.task import Task as _DbTask
 from dNG.pas.runtime.io_exception import IOException
 from dNG.pas.runtime.type_exception import TypeException
@@ -429,23 +428,20 @@ Load DatabaseTask entry from database.
 
 				if ((not Settings.get("pas_database_auto_maintenance", False)) and randrange(0, 3) < 1):
 				#
-					with TransactionContext():
-					#
-						archive_timeout = int(Settings.get("pas_tasks_database_tasks_archive_timeout", 28)) * 86400
-						timestamp = int(time())
-						timestamp_archive = timestamp - archive_timeout
+					archive_timeout = int(Settings.get("pas_tasks_database_tasks_archive_timeout", 28)) * 86400
+					timestamp = int(time())
+					timestamp_archive = timestamp - archive_timeout
 
-						if (connection.query(_DbTask)
-						    .filter(or_(and_(_DbTask.status == DatabaseTask.STATUS_COMPLETED,
-						                     _DbTask.time_scheduled > 0,
-						                     _DbTask.time_scheduled < timestamp_archive
-						                    ),
-						                and_(_DbTask.timeout > 0, _DbTask.timeout < timestamp)
-						               )
-						           )
-						    .delete() > 0
-						   ): connection.optimize_random(_DbTask)
-					#
+					if (connection.query(_DbTask)
+					    .filter(or_(and_(_DbTask.status == DatabaseTask.STATUS_COMPLETED,
+					                     _DbTask.time_scheduled > 0,
+					                     _DbTask.time_scheduled < timestamp_archive
+					                    ),
+					                and_(_DbTask.timeout > 0, _DbTask.timeout < timestamp)
+					               )
+					           )
+					    .delete() > 0
+					   ): connection.optimize_random(_DbTask)
 				#
 			#
 		#
@@ -528,7 +524,7 @@ Resets all stale tasks with the "running" status.
 :since:  v0.1.00
 		"""
 
-		with Connection.get_instance() as connection, TransactionContext():
+		with Connection.get_instance() as connection:
 		#
 			connection.query(_DbTask).filter(or_(_DbTask.status == DatabaseTask.STATUS_QUEUED,
 			                                     _DbTask.status == DatabaseTask.STATUS_RUNNING

@@ -31,46 +31,62 @@ https://www.direct-netware.de/redirect?licenses;gpl
 #echo(__FILEPATH__)#
 """
 
+from threading import Thread
+
+from dNG.pas.runtime.exception_log_trap import ExceptionLogTrap
 from dNG.pas.runtime.not_implemented_exception import NotImplementedException
 
 class AbstractHook(object):
 #
 	"""
-Hook objects are used to define and execute for example queued, long running
-tasks (LRT).
+The hook instance based task can be used if the the task store is memory
+based.
 
 :author:     direct Netware Group
 :copyright:  direct Netware Group - All rights reserved
 :package:    pas
 :subpackage: tasks
-:since:      v0.1.00
+:since:      v0.1.02
 :license:    https://www.direct-netware.de/redirect?licenses;gpl
              GNU General Public License 2
 	"""
 
 	# pylint: disable=unused-argument
 
-	def run(self, task_store, tid, **params):
+	def run(self, task_store, _tid, **kwargs):
 	#
 		"""
 Starts the execution of this hook synchronously.
 
 :return: (mixed) Task result
-:since:  v0.1.00
+:since:  v0.1.02
+		"""
+
+		with ExceptionLogTrap("pas_tasks"): return self._run_hook(**kwargs)
+	#
+
+	def _run_hook(self, **kwargs):
+	#
+		"""
+Hook execution
+
+:return: (mixed) Task result
+:since:  v0.1.02
 		"""
 
 		raise NotImplementedException()
 	#
 
-	def start(self, task_store, tid, **params):
+	def start(self, task_store, _tid, **kwargs):
 	#
 		"""
 Starts the execution of this hook asynchronously.
 
-:since: v0.1.00
+:since: v0.1.02
 		"""
 
-		raise NotImplementedException()
+		thread = Thread(target = self.run, args = ( task_store, _tid ), kwargs = kwargs)
+		thread.start()
 	#
 #
 

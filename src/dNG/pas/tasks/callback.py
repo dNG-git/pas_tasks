@@ -31,12 +31,9 @@ https://www.direct-netware.de/redirect?licenses;gpl
 #echo(__FILEPATH__)#
 """
 
-from threading import Thread
+from .abstract_hook import AbstractHook
 
-from dNG.pas.data.logging.log_line import LogLine
-from .abstract import Abstract
-
-class Callback(Abstract):
+class Callback(AbstractHook):
 #
 	"""
 The callback task can be used if the the task store is memory based.
@@ -45,7 +42,7 @@ The callback task can be used if the the task store is memory based.
 :copyright:  direct Netware Group - All rights reserved
 :package:    pas
 :subpackage: tasks
-:since:      v0.1.00
+:since:      v0.1.02
 :license:    https://www.direct-netware.de/redirect?licenses;gpl
              GNU General Public License 2
 	"""
@@ -57,10 +54,10 @@ The callback task can be used if the the task store is memory based.
 		"""
 Constructor __init__(Callback)
 
-:since: v0.1.00
+:since: v0.1.02
 		"""
 
-		Abstract.__init__(self)
+		AbstractHook.__init__(self)
 
 		self.callback = callback
 		"""
@@ -68,33 +65,16 @@ Python callback
 		"""
 	#
 
-	def run(self, task_store, _tid, **kwargs):
+	def _run_hook(self, **kwargs):
 	#
 		"""
-Starts the execution of this hook synchronously.
+Hook execution
 
 :return: (mixed) Task result
-:since:  v0.1.00
+:since:  v0.1.02
 		"""
 
-		try: return self.callback(**kwargs)
-		except Exception as handled_exception:
-		#
-			LogLine.error(handled_exception, context = "pas_tasks")
-			raise
-		#
-	#
-
-	def start(self, task_store, _tid, **kwargs):
-	#
-		"""
-Starts the execution of this hook asynchronously.
-
-:since: v0.1.00
-		"""
-
-		thread = Thread(target = self.run, args = ( task_store, _tid ), kwargs = kwargs)
-		thread.start()
+		return self.callback(**kwargs)
 	#
 #
 
