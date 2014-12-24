@@ -89,12 +89,12 @@ Add a new task with the given TID to the storage for later activation.
 :since: v0.1.00
 		"""
 
-		if (timeout == None): timeout = self.task_timeout
+		if (timeout is None): timeout = self.task_timeout
 		timestamp = int(time() + timeout)
 
 		params = kwargs
 		self._insert(tid, hook, params, timestamp)
-		if (self.log_handler != None): self.log_handler.debug("{0!r} registered TID '{1}' with target {2!r}", self, tid, hook, context = "pas_tasks")
+		if (self.log_handler is not None): self.log_handler.debug("{0!r} registered TID '{1}' with target {2!r}", self, tid, hook, context = "pas_tasks")
 	#
 
 	def call(self, params, last_return = None):
@@ -112,10 +112,10 @@ if "last_return" is None.
 
 		_return = last_return
 
-		if (_return == None and "tid" in params):
+		if (_return is None and "tid" in params):
 		#
 			task = self.get(params['tid'])
-			task_status = (DatabaseTask.STATUS_UNKNOWN if (task == None) else task['_task'].get_status())
+			task_status = (DatabaseTask.STATUS_UNKNOWN if (task is None) else task['_task'].get_status())
 
 			if (task_status == DatabaseTask.STATUS_WAITING): _return = Abstract.call(self, params)
 		#
@@ -191,13 +191,13 @@ Add a new task with the given TID to the storage for later activation.
 			task.set_hook(hook)
 			task.set_params(params)
 
-			if (time_scheduled != None):
+			if (time_scheduled is not None):
 			#
 				time_scheduled = int(time_scheduled)
 				task.set_time_scheduled(time_scheduled)
 			#
 
-			if (timeout != None):
+			if (timeout is not None):
 			#
 				timeout = int(timeout)
 				task.set_timeout(timeout)
@@ -205,9 +205,9 @@ Add a new task with the given TID to the storage for later activation.
 
 			task.save()
 
-			time_to_execution = (None if (time_scheduled == None) else time_scheduled - int(time()))
+			time_to_execution = (None if (time_scheduled is None) else time_scheduled - int(time()))
 
-			if (time_to_execution != None
+			if (time_to_execution is not None
 			    and (self.timer_timeout < 0 or self.timer_timeout > time_to_execution)
 			   ): self.update_timestamp(time_scheduled)
 		#
@@ -225,7 +225,7 @@ Checks if a given task ID is known.
 :since:  v0.1.00
 		"""
 
-		return (False if (DatabaseTask.load_tid(tid) == None) else True)
+		return (False if (DatabaseTask.load_tid(tid) is None) else True)
 	#
 
 	def register_timeout(self, tid, hook, timeout = None, **kwargs):
@@ -240,13 +240,13 @@ Registers a new task with the given TID to the storage for later use.
 :since: v0.1.00
 		"""
 
-		if (timeout == None): timeout = self.task_timeout
+		if (timeout is None): timeout = self.task_timeout
 		timeout_time = int(time() + timeout)
 
 		params = kwargs
 		params['_timeout'] = timeout
 		self._insert(tid, hook, params, timeout = timeout_time)
-		if (self.log_handler != None): self.log_handler.debug("{0!r} registered TID '{1}' with target {2!r}", self, tid, hook, context = "pas_tasks")
+		if (self.log_handler is not None): self.log_handler.debug("{0!r} registered TID '{1}' with target {2!r}", self, tid, hook, context = "pas_tasks")
 	#
 
 	def remove(self, tid):
@@ -271,7 +271,7 @@ Removes the given TID from the storage.
 		#
 		except NothingMatchedException: pass
 
-		if (_return and self.log_handler != None): self.log_handler.debug("{0!r} removed TID '{1}'", self, tid, context = "pas_tasks")
+		if (_return and self.log_handler is not None): self.log_handler.debug("{0!r} removed TID '{1}'", self, tid, context = "pas_tasks")
 		return _return
 	#
 
@@ -323,7 +323,7 @@ Timed task execution
 				except NothingMatchedException: pass
 			#
 
-			if (task != None):
+			if (task is not None):
 			#
 				task.set_status(DatabaseTask.STATUS_QUEUED)
 				task.save()
@@ -335,7 +335,7 @@ Timed task execution
 			#
 
 			AbstractTimed.run(self)
-			if (task_data != None): self._start_task(task_data)
+			if (task_data is not None): self._start_task(task_data)
 		#
 	#
 
@@ -397,7 +397,7 @@ Removes the given TID from the storage.
 		#
 		except NothingMatchedException: pass
 
-		if (_return and self.log_handler != None): self.log_handler.debug("{0!r} removed TID '{1}'", self, tid, context = "pas_tasks")
+		if (_return and self.log_handler is not None): self.log_handler.debug("{0!r} removed TID '{1}'", self, tid, context = "pas_tasks")
 		return _return
 	#
 
@@ -415,9 +415,9 @@ Get the Database singleton.
 
 		with Database._instance_lock:
 		#
-			if (Database._weakref_instance != None): _return = Database._weakref_instance()
+			if (Database._weakref_instance is not None): _return = Database._weakref_instance()
 
-			if (_return == None):
+			if (_return is None):
 			#
 				_return = Database()
 				Database._weakref_instance = ref(_return)

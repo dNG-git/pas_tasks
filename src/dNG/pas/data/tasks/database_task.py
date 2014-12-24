@@ -115,7 +115,7 @@ Task parameter specified
 Task ID
 		"""
 
-		if (db_instance != None):
+		if (db_instance is not None):
 		#
 			with self:
 			#
@@ -127,7 +127,7 @@ Task ID
 			#
 		#
 
-		if (self.params == None): self.params = { }
+		if (self.params is None): self.params = { }
 	#
 
 	def get_hook(self):
@@ -218,9 +218,9 @@ thread.
 
 		_return = True
 
-		if (self.db_id == None):
+		if (self.db_id is None):
 		# Thread safety
-			with self._lock: _return = (self.db_id != None)
+			with self._lock: _return = (self.db_id is not None)
 		#
 
 		return _return
@@ -259,9 +259,9 @@ Implementation of the reloading SQLAlchemy database instance logic.
 :since: v0.1.00
 		"""
 
-		if (self.local.db_instance == None):
+		if (self.local.db_instance is None):
 		#
-			if (self.db_id == None): raise IOException("Database instance is not reloadable.")
+			if (self.db_id is None): raise IOException("Database instance is not reloadable.")
 			self.local.db_instance = self.local.connection.query(_DbTask).filter(_DbTask.id == self.db_id).one()
 		#
 		else: Instance._reload(self)
@@ -281,7 +281,7 @@ Saves changes of the database task instance.
 			self.params['_tid'] = self.tid
 
 			if (self.local.db_instance.name == ""): self.local.db_instance.name = Binary.utf8(self.hook[-100:])
-			if (self.local.db_instance.status == None): self.local.db_instance.status = DatabaseTask.STATUS_WAITING
+			if (self.local.db_instance.status is None): self.local.db_instance.status = DatabaseTask.STATUS_WAITING
 			self.local.db_instance.hook = Binary.utf8(self.hook)
 			self.local.db_instance.params = Binary.utf8(JsonResource().data_to_json(self.params))
 			self.local.db_instance.time_updated = int(time())
@@ -302,7 +302,7 @@ Sets values given as keyword arguments to this method.
 
 		with self:
 		#
-			if (self.db_id == None): self.db_id = self.local.db_instance.id
+			if (self.db_id is None): self.db_id = self.local.db_instance.id
 
 			if ("tid" in kwargs): self.tid = kwargs['tid']
 			if ("name" in kwargs): self.local.db_instance.name = Binary.utf8(kwargs['name'][-100:])
@@ -419,7 +419,7 @@ Load DatabaseTask entry from database.
 
 		_return = None
 
-		if (db_instance != None):
+		if (db_instance is not None):
 		#
 			with Connection.get_instance() as connection:
 			#
@@ -446,7 +446,7 @@ Load DatabaseTask entry from database.
 			#
 		#
 
-		if (_return == None): raise NothingMatchedException("Task not found")
+		if (_return is None): raise NothingMatchedException("Task not found")
 		return _return
 	#
 
@@ -462,7 +462,7 @@ Load DatabaseTask value by entry ID.
 :since:  v0.1.00
 		"""
 
-		if (_id == None): raise NothingMatchedException("Task entry ID is invalid")
+		if (_id is None): raise NothingMatchedException("Task entry ID is invalid")
 		with Connection.get_instance() as connection: return DatabaseTask._load(connection.query(_DbTask).get(_id))
 	#
 
@@ -478,7 +478,7 @@ Load DatabaseTask to be executed next.
 :since:  v0.1.00
 		"""
 
-		if (status == None): status = DatabaseTask.STATUS_WAITING
+		if (status is None): status = DatabaseTask.STATUS_WAITING
 
 		with Connection.get_instance() as connection:
 		#
@@ -507,7 +507,7 @@ Load DatabaseTask value by ID.
 :since:  v0.1.00
 		"""
 
-		if (tid == None): raise NothingMatchedException("Task ID is invalid")
+		if (tid is None): raise NothingMatchedException("Task ID is invalid")
 
 		with Connection.get_instance() as connection:
 		#

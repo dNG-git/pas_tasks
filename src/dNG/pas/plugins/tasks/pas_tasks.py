@@ -36,7 +36,21 @@ https://www.direct-netware.de/redirect?licenses;gpl
 from dNG.pas.data.tasks.database import Database as DatabaseTasks
 from dNG.pas.data.tasks.memory import Memory as MemoryTasks
 from dNG.pas.plugins.hook import Hook
+from dNG.pas.runtime.thread_lock import ThreadLock
 from dNG.pas.runtime.value_exception import ValueException
+
+_lock = ThreadLock()
+"""
+Thread safety lock
+"""
+_database_tasks_instance = None
+"""
+DatabaseTasks instance
+"""
+_memory_tasks_instance = None
+"""
+MemoryTasks instance
+"""
 
 def add_database_task(params, last_return = None):
 #
@@ -52,7 +66,7 @@ Called for "dNG.pas.tasks.Database.add"
 
 	# pylint: disable=star-args
 
-	if (last_return != None): _return = last_return
+	if (last_return is not None): _return = last_return
 	elif ("tid" not in params
 	      or "hook" not in params
 	      or "timeout" not in params
@@ -79,12 +93,12 @@ Called for "dNG.pas.Tasks.call"
 :since:  v0.1.00
 	"""
 
-	if (last_return != None): _return = last_return
+	if (last_return is not None): _return = last_return
 	elif ("tid" not in params): raise ValueException("Missing required argument")
 	else:
 	#
 		_return = MemoryTasks.get_instance().call(params)
-		if (_return == None): _return = DatabaseTasks.get_instance().call(params)
+		if (_return is None): _return = DatabaseTasks.get_instance().call(params)
 	#
 
 	return _return
@@ -102,7 +116,7 @@ Called for "dNG.pas.tasks.Database.call"
 :since:  v0.1.00
 	"""
 
-	if (last_return != None): _return = last_return
+	if (last_return is not None): _return = last_return
 	elif ("params" not in params): raise ValueException("Missing required argument")
 	else:
 	#
@@ -125,7 +139,7 @@ Called for "dNG.pas.tasks.Database.get"
 :since:  v0.1.00
 	"""
 
-	if (last_return != None): _return = last_return
+	if (last_return is not None): _return = last_return
 	elif ("tid" not in params): raise ValueException("Missing required argument")
 	else: _return = DatabaseTasks.get_instance().get(params['tid'])
 
@@ -144,7 +158,7 @@ Called for "dNG.pas.tasks.Database.isRegistered"
 :since:  v0.1.00
 	"""
 
-	if (last_return != None): _return = last_return
+	if (last_return is not None): _return = last_return
 	elif ("tid" not in params): raise ValueException("Missing required argument")
 	else:
 	#
@@ -153,6 +167,70 @@ Called for "dNG.pas.tasks.Database.isRegistered"
 	#
 
 	return _return
+#
+
+def on_shutdown(params, last_return = None):
+#
+	"""
+Called for "dNG.pas.Status.onShutdown"
+
+:param params: Parameter specified
+:param last_return: The return value from the last hook called.
+
+:since: v0.1.00
+	"""
+
+	# global: _lock
+	global _database_tasks_instance, _memory_tasks_instance
+
+	with _lock:
+	#
+		if (_database_tasks_instance is not None):
+		#
+			_database_tasks_instance.stop()
+			_database_tasks_instance = None
+		#
+
+		if (_memory_tasks_instance is not None):
+		#
+			_memory_tasks_instance.stop()
+			_memory_tasks_instance = None
+		#
+	#
+
+	return last_return
+#
+
+def on_startup(params, last_return = None):
+#
+	"""
+Called for "dNG.pas.Status.onStartup"
+
+:param params: Parameter specified
+:param last_return: The return value from the last hook called.
+
+:since: v0.1.00
+	"""
+
+	# global: _lock
+	global _database_tasks_instance, _memory_tasks_instance
+
+	with _lock:
+	#
+		if (_database_tasks_instance is None):
+		#
+			_database_tasks_instance = DatabaseTasks.get_instance()
+			_database_tasks_instance.start()
+		#
+
+		if (_memory_tasks_instance is None):
+		#
+			_memory_tasks_instance = MemoryTasks.get_instance()
+			_memory_tasks_instance.start()
+		#
+	#
+
+	return last_return
 #
 
 def register_database_timeout_task(params, last_return = None):
@@ -169,7 +247,7 @@ Called for "dNG.pas.tasks.Database.registerTimeout"
 
 	# pylint: disable=star-args
 
-	if (last_return != None): _return = last_return
+	if (last_return is not None): _return = last_return
 	elif ("tid" not in params
 	      or "hook" not in params
 	      or "timeout" not in params
@@ -192,6 +270,8 @@ Register plugin hooks.
 :since: v0.1.00
 	"""
 
+	Hook.register("dNG.pas.Status.onShutdown", on_shutdown)
+	Hook.register("dNG.pas.Status.onStartup", on_startup)
 	Hook.register("dNG.pas.Tasks.call", call)
 	Hook.register("dNG.pas.tasks.Database.isRegistered", is_database_task_registered)
 	Hook.register("dNG.pas.tasks.Database.add", add_database_task)
@@ -215,7 +295,7 @@ Called for "dNG.pas.tasks.Database.remove"
 :since:  v0.1.00
 	"""
 
-	if (last_return != None): _return = last_return
+	if (last_return is not None): _return = last_return
 	elif ("tid" not in params): raise ValueException("Missing required argument")
 	else: _return = DatabaseTasks.get_instance().remove(params['tid'])
 
@@ -234,7 +314,7 @@ Called for "dNG.pas.tasks.Database.reregisterTimeout"
 :since:  v0.1.00
 	"""
 
-	if (last_return != None): _return = last_return
+	if (last_return is not None): _return = last_return
 	elif ("tid" not in params): raise ValueException("Missing required argument")
 	else: _return = DatabaseTasks.get_instance().reregister_timeout(params['tid'])
 
@@ -253,7 +333,7 @@ Called for "dNG.pas.tasks.Database.unregisterTimeout"
 :since:  v0.1.00
 	"""
 
-	if (last_return != None): _return = last_return
+	if (last_return is not None): _return = last_return
 	elif ("tid" not in params): raise ValueException("Missing required argument")
 	else: _return = DatabaseTasks.get_instance().unregister_timeout(params['tid'])
 
@@ -268,6 +348,8 @@ Unregister plugin hooks.
 :since: v0.1.00
 	"""
 
+	Hook.unregister("dNG.pas.Status.onShutdown", on_shutdown)
+	Hook.unregister("dNG.pas.Status.onStartup", on_startup)
 	Hook.unregister("dNG.pas.Tasks.call", call)
 	Hook.unregister("dNG.pas.tasks.Database.isRegistered", is_database_task_registered)
 	Hook.unregister("dNG.pas.tasks.Database.add", add_database_task)

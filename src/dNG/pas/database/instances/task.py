@@ -115,11 +115,11 @@ Constructor __init__(UserProfile)
 
 		Abstract.__init__(self, *args, **kwargs)
 
-		if (self.id == None): self.id = uuid().hex
+		if (self.id is None): self.id = uuid().hex
 
 		timestamp = int(time())
-		if (self.time_started == None): self.time_started = timestamp
-		if (self.time_updated == None): self.time_updated = timestamp
+		if (self.time_started is None): self.time_started = timestamp
+		if (self.time_updated is None): self.time_updated = timestamp
 	#
 #
 

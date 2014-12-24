@@ -104,11 +104,11 @@ if "last_return" is None.
 
 		_return = last_return
 
-		if (_return == None and "tid" in params):
+		if (_return is None and "tid" in params):
 		#
 			task = self.get(params['tid'])
 
-			if (task == None): is_valid = False
+			if (task is None): is_valid = False
 			else:
 			#
 				is_valid = (True

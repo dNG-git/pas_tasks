@@ -134,15 +134,16 @@ Returns the manager instance responsible for this hook.
 
 		with AbstractLrtHook._lock: task = self._task_get()
 
-		while (task != None):
+		while (task is not None):
 		#
+			if (self.log_handler is not None): self.log_handler.debug("pas.Tasks is executing '{0!r}' in context '{1}'", self, self.context_id, context = "pas_tasks")
 			with ExceptionLogTrap("pas_tasks"): task._run_hook()
 
 			with AbstractLrtHook._lock:
 			#
 				AbstractLrtHook._context_queues[self.context_id].task_done()
 				task = self._task_get()
-				if (task == None): del(AbstractLrtHook._context_queues[self.context_id])
+				if (task is None): del(AbstractLrtHook._context_queues[self.context_id])
 			#
 		#
 	#
@@ -172,7 +173,7 @@ Starts the execution of this hook asynchronously.
 		with AbstractLrtHook._lock:
 		#
 			if (AbstractLrtHook._context_limit < 1): AbstractLrtHook._context_limit = Settings.get("pas_global_tasks_lrt_limit", 1)
-			if (self.params == None): self.params = kwargs
+			if (self.params is None): self.params = kwargs
 
 			if (self.context_id in AbstractLrtHook._context_queues):
 			#

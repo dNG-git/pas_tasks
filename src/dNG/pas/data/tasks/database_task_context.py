@@ -89,7 +89,7 @@ python.org: Exit the runtime context related to this object.
 :since:  v0.1.00
 		"""
 
-		if (exc_type != None or exc_value != None): self.task.set_status(DatabaseTask.STATUS_FAILED)
+		if (exc_type is not None or exc_value is not None): self.task.set_status(DatabaseTask.STATUS_FAILED)
 		elif (self.task.get_status() == DatabaseTask.STATUS_RUNNING):
 		#
 			self.task.set_status(DatabaseTask.STATUS_WAITING

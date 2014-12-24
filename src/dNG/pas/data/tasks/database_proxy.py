@@ -100,7 +100,7 @@ Opens a bus connection.
 :since: v0.1.00
 		"""
 
-		if (self.client == None): self.client = Client("pas_tasks_daemon")
+		if (self.client is None): self.client = Client("pas_tasks_daemon")
 	#
 
 	def disconnect(self):
@@ -111,7 +111,7 @@ Closes an active bus connection.
 :since: v0.1.00
 		"""
 
-		if (self.client != None): self.client.disconnect()
+		if (self.client is not None): self.client.disconnect()
 	#
 
 	def add(self, tid, hook, timeout = None, **kwargs):
@@ -261,9 +261,9 @@ Get the DatabaseProxy singleton.
 
 		with DatabaseProxy._lock:
 		#
-			if (DatabaseProxy._weakref_instance != None): _return = DatabaseProxy._weakref_instance()
+			if (DatabaseProxy._weakref_instance is not None): _return = DatabaseProxy._weakref_instance()
 
-			if (_return == None):
+			if (_return is None):
 			#
 				_return = DatabaseProxy()
 				DatabaseProxy._weakref_instance = ref(_return)

@@ -95,9 +95,9 @@ Add a new task with the given TID to the storage for later activation.
 		"""
 
 		tid = Binary.str(tid)
-		if (timeout == None): timeout = self.task_timeout
+		if (timeout is None): timeout = self.task_timeout
 
-		if (self.log_handler != None): self.log_handler.debug("pas.Tasks added TID '{0}' with target '{1!r}'", tid, hook, context = "pas_tasks")
+		if (self.log_handler is not None): self.log_handler.debug("pas.Tasks added TID '{0}' with target '{1!r}'", tid, hook, context = "pas_tasks")
 
 		params = kwargs
 		params['_tid'] = tid
@@ -269,7 +269,7 @@ Checks if a given task ID is known.
 		#
 			for position in range(0, len(self.tasks)):
 			#
-				if (tid == self.tasks[position]['tid'] and (hook == None or hook == self.tasks[position]['hook'])):
+				if (tid == self.tasks[position]['tid'] and (hook is None or hook == self.tasks[position]['hook'])):
 				#
 					_return = True
 					break
@@ -293,9 +293,9 @@ Registers a new task with the given TID to the storage for later use.
 		"""
 
 		tid = Binary.str(tid)
-		if (timeout == None): timeout = self.task_timeout
+		if (timeout is None): timeout = self.task_timeout
 
-		if (self.log_handler != None): self.log_handler.debug("pas.Tasks registered TID '{0}' with target '{1!r}'", tid, hook, context = "pas_tasks")
+		if (self.log_handler is not None): self.log_handler.debug("pas.Tasks registered TID '{0}' with target '{1!r}'", tid, hook, context = "pas_tasks")
 
 		params = kwargs
 		params['_tid'] = tid
@@ -316,7 +316,7 @@ Removes the given TID from the storage.
 		tid = Binary.str(tid)
 		_return = self._delete(tid)
 
-		if (_return and self.log_handler != None): self.log_handler.debug("{0!r} removed TID '{1}'", self, tid, context = "pas_tasks")
+		if (_return and self.log_handler is not None): self.log_handler.debug("{0!r} removed TID '{1}'", self, tid, context = "pas_tasks")
 		return _return
 	#
 
@@ -334,7 +334,7 @@ Updates the task with the given TID to push its expiration time.
 		tid = Binary.str(tid)
 		task = self.get(tid)
 
-		if (task == None): _return = False
+		if (task is None): _return = False
 		else:
 		#
 			self.unregister_timeout(tid)
@@ -365,10 +365,10 @@ Timed task execution
 			#
 		#
 
-		if (task != None):
+		if (task is not None):
 		#
 			if ("_timeout" not in task): self._start_task(task)
-			elif (self.log_handler != None): self.log_handler.debug("{0!r} timed out TID '{1}'", self, task['tid'], context = "pas_tasks")
+			elif (self.log_handler is not None): self.log_handler.debug("{0!r} timed out TID '{1}'", self, task['tid'], context = "pas_tasks")
 		#
 	#
 
@@ -386,7 +386,7 @@ Removes the given TID from the storage.
 		tid = Binary.str(tid)
 		_return = self._delete(tid)
 
-		if (_return and self.log_handler != None): self.log_handler.debug("{0!r} removed TID '{1}'", self, tid, context = "pas_tasks")
+		if (_return and self.log_handler is not None): self.log_handler.debug("{0!r} removed TID '{1}'", self, tid, context = "pas_tasks")
 		return _return
 	#
 
@@ -404,9 +404,9 @@ Get the Memory singleton.
 
 		with Memory._instance_lock:
 		#
-			if (Memory._weakref_instance != None): _return = Memory._weakref_instance()
+			if (Memory._weakref_instance is not None): _return = Memory._weakref_instance()
 
-			if (_return == None):
+			if (_return is None):
 			#
 				_return = Memory()
 				Memory._weakref_instance = ref(_return)
