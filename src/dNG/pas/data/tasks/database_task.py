@@ -61,6 +61,10 @@ A "Database" instance stores tasks in the database.
              GNU General Public License 2
 	"""
 
+	_DB_INSTANCE_CLASS = _DbTask
+	"""
+SQLAlchemy database instance class to initialize for new instances.
+	"""
 	STATUS_COMPLETED = 32
 	"""
 Task has been completed
@@ -298,8 +302,6 @@ Sets values given as keyword arguments to this method.
 :since: v0.1.00
 		"""
 
-		self._ensure_thread_local_instance(_DbTask)
-
 		with self:
 		#
 			if (self.db_id is None): self.db_id = self.local.db_instance.id
@@ -406,11 +408,12 @@ Sets a timeout for the task.
 	"""
 
 	@staticmethod
-	def _load(db_instance):
+	def _load(cls, db_instance):
 	#
 		"""
 Load DatabaseTask entry from database.
 
+:param cls: Expected encapsulating database instance class
 :param db_instance: SQLAlchemy database instance
 
 :return: (object) DatabaseTask instance on success
@@ -423,6 +426,8 @@ Load DatabaseTask entry from database.
 		#
 			with Connection.get_instance() as connection:
 			#
+				Instance._ensure_db_class(cls, db_instance)
+
 				_return = DatabaseTask(db_instance)
 				if (_return.is_timed_out()): _return = None
 
@@ -446,16 +451,16 @@ Load DatabaseTask entry from database.
 			#
 		#
 
-		if (_return is None): raise NothingMatchedException("Task not found")
 		return _return
 	#
 
-	@staticmethod
-	def load_id(_id):
+	@classmethod
+	def load_id(cls, _id):
 	#
 		"""
 Load DatabaseTask value by entry ID.
 
+:param cls: Expected encapsulating database instance class
 :param _id: Task entry ID
 
 :return: (object) DatabaseTask instance on success
@@ -463,15 +468,20 @@ Load DatabaseTask value by entry ID.
 		"""
 
 		if (_id is None): raise NothingMatchedException("Task entry ID is invalid")
-		with Connection.get_instance() as connection: return DatabaseTask._load(connection.query(_DbTask).get(_id))
+
+		with Connection.get_instance(): _return = DatabaseTask._load(cls, Instance.get_db_class_query(cls).get(_id))
+
+		if (_return is None): raise NothingMatchedException("Task entry ID '{0}' not found".format(_id))
+		return _return
 	#
 
-	@staticmethod
-	def load_next(status = None):
+	@classmethod
+	def load_next(cls, status = None):
 	#
 		"""
 Load DatabaseTask to be executed next.
 
+:param cls: Expected encapsulating database instance class
 :param status: Task status
 
 :return: (object) DatabaseTask instance on success
@@ -480,27 +490,33 @@ Load DatabaseTask to be executed next.
 
 		if (status is None): status = DatabaseTask.STATUS_WAITING
 
-		with Connection.get_instance() as connection:
+		with Connection.get_instance():
 		#
-			return DatabaseTask._load(connection.query(_DbTask)
-			                          .filter(_DbTask.status == status,
-			                                  _DbTask.time_scheduled > 0,
-			                                  or_(_DbTask.timeout == 0,
-			                                      _DbTask.timeout >= int(time())
-			                                     )
-			                                 )
-			                          .order_by(_DbTask.time_scheduled.asc())
-			                          .first()
-			                         )
+			db_instance = (Instance.get_db_class_query(cls)
+			               .filter(_DbTask.status == status,
+			                       _DbTask.time_scheduled > 0,
+			                       or_(_DbTask.timeout == 0,
+			                           _DbTask.timeout >= int(time())
+			                          )
+			                      )
+			               .order_by(_DbTask.time_scheduled.asc())
+			               .first()
+			              )
+
+			_return = DatabaseTask._load(cls, db_instance)
 		#
+
+		if (_return is None): raise NothingMatchedException("No scheduled task found")
+		return _return
 	#
 
-	@staticmethod
-	def load_tid(tid):
+	@classmethod
+	def load_tid(cls, tid):
 	#
 		"""
 Load DatabaseTask value by ID.
 
+:param cls: Expected encapsulating database instance class
 :param tid: Task ID
 
 :return: (object) DatabaseTask instance on success
@@ -509,10 +525,14 @@ Load DatabaseTask value by ID.
 
 		if (tid is None): raise NothingMatchedException("Task ID is invalid")
 
-		with Connection.get_instance() as connection:
+		with Connection.get_instance():
 		#
-			return DatabaseTask._load(connection.query(_DbTask).filter(_DbTask.tid == Md5.hash(tid)).limit(1).first())
+			db_instance = Instance.get_db_class_query(cls).filter(_DbTask.tid == Md5.hash(tid)).limit(1).first()
+			_return = DatabaseTask._load(cls, db_instance)
 		#
+
+		if (_return is None): raise NothingMatchedException("Task ID '{0}' not found".format(tid))
+		return _return
 	#
 
 	@staticmethod
