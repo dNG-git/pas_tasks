@@ -94,7 +94,7 @@ Add a new task with the given TID to the storage for later activation.
 
 		params = kwargs
 		self._insert(tid, hook, params, timestamp)
-		if (self.log_handler is not None): self.log_handler.debug("{0!r} registered TID '{1}' with target {2!r}", self, tid, hook, context = "pas_tasks")
+		if (self.log_handler is not None): self.log_handler.debug("{0!r} registered TID '{1}' with target {2!r} and timeout '{3}'", self, tid, hook, timeout, context = "pas_tasks")
 	#
 
 	def call(self, params, last_return = None):

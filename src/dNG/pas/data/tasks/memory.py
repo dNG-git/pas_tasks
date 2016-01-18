@@ -97,7 +97,7 @@ Add a new task with the given TID to the storage for later activation.
 		tid = Binary.str(tid)
 		if (timeout is None): timeout = self.task_timeout
 
-		if (self.log_handler is not None): self.log_handler.debug("pas.Tasks added TID '{0}' with target '{1!r}'", tid, hook, context = "pas_tasks")
+		if (self.log_handler is not None): self.log_handler.debug("{0!r} added TID '{1}' with target {2!r} and timeout '{3}'", self, tid, hook, timeout, context = "pas_tasks")
 
 		params = kwargs
 		params['_tid'] = tid
@@ -295,7 +295,7 @@ Registers a new task with the given TID to the storage for later use.
 		tid = Binary.str(tid)
 		if (timeout is None): timeout = self.task_timeout
 
-		if (self.log_handler is not None): self.log_handler.debug("pas.Tasks registered TID '{0}' with target '{1!r}'", tid, hook, context = "pas_tasks")
+		if (self.log_handler is not None): self.log_handler.debug("{0!r} registered TID '{1}' with target {2!r}", self, tid, hook, context = "pas_tasks")
 
 		params = kwargs
 		params['_tid'] = tid
