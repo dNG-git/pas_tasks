@@ -99,6 +99,14 @@ arrive. Set this variable to true to reschedule these tasks independently.
 The LogHandler is called whenever debug messages should be logged or errors
 happened.
 		"""
+		self.max_retry_delay = Settings.get("pas_global_tasks_lrt_retry_delay_max", 120)
+		"""
+Maximum delay for rescheduled tasks
+		"""
+		self.min_retry_delay = Settings.get("pas_global_tasks_lrt_retry_delay_min", 10)
+		"""
+Minimum delay for rescheduled tasks
+		"""
 		self.params = None
 		"""
 Task parameters
@@ -107,6 +115,34 @@ Task parameters
 		"""
 Task ID
 		"""
+	#
+
+	def _get_queue_delay(self):
+	#
+		"""
+Returns the delay value for rescheduling.
+
+:return: (float) Delay for rescheduling a task
+:since:  v0.1.02
+		"""
+
+		_return = self.min_retry_delay
+
+		with AbstractLrtHook._lock:
+		#
+			multiplier = 1
+
+			for context_name in AbstractLrtHook._context_queues:
+			#
+				multiplier += AbstractLrtHook._context_queues[context_name].qsize()
+			#
+
+			_return *= (multiplier / AbstractLrtHook._context_limit)
+		#
+
+		if (_return > self.max_retry_delay): _return = self.max_retry_delay
+
+		return _return
 	#
 
 	def run(self, task_store, _tid, **kwargs):
@@ -136,7 +172,7 @@ Returns the manager instance responsible for this hook.
 
 		while (task is not None):
 		#
-			if (self.log_handler is not None): self.log_handler.debug("pas.Tasks is executing '{0!r}' in context '{1}'", self, self.context_id, context = "pas_tasks")
+			if (self.log_handler is not None): self.log_handler.debug("{0!r} is executing tasks with context '{1}'", self, self.context_id, context = "pas_tasks")
 			with ExceptionLogTrap("pas_tasks"): task._run_hook()
 
 			with AbstractLrtHook._lock:
@@ -195,7 +231,7 @@ Starts the execution of this hook asynchronously.
 			#
 		#
 
-		if (not is_queued): task_store.add(_tid, self, 10) # TODO: Setting or constant please ;)
+		if (not is_queued): task_store.add(_tid, self, self._get_queue_delay())
 	#
 
 	def _task_get(self):
