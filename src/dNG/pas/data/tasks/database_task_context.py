@@ -31,6 +31,8 @@ https://www.direct-netware.de/redirect?licenses;gpl
 #echo(__FILEPATH__)#
 """
 
+from traceback import format_exception
+
 from .database_task import DatabaseTask
 
 class DatabaseTaskContext(object):
@@ -89,7 +91,21 @@ python.org: Exit the runtime context related to this object.
 :since:  v0.1.00
 		"""
 
-		if (exc_type is not None or exc_value is not None): self.task.set_status(DatabaseTask.STATUS_FAILED)
+		if (exc_type is not None or exc_value is not None):
+		#
+			params = self.task.get_params()
+
+			if ("error" not in params):
+			#
+				params['error'] = { "type": "exception",
+				                    "exception": "".join(format_exception(exc_type, exc_value, traceback))
+				                  }
+
+				self.task.set_params(params)
+			#
+
+			self.task.set_status(DatabaseTask.STATUS_FAILED)
+		#
 		elif (self.task.get_status() == DatabaseTask.STATUS_RUNNING):
 		#
 			self.task.set_status(DatabaseTask.STATUS_WAITING
