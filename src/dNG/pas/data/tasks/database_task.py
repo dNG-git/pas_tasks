@@ -35,14 +35,18 @@ from random import randrange
 from time import time
 
 from sqlalchemy.sql.expression import and_, or_
+from sqlalchemy.sql.functions import count as sql_count
 
 from dNG.data.json_resource import JsonResource
 from dNG.pas.data.binary import Binary
 from dNG.pas.data.settings import Settings
 from dNG.pas.data.text.md5 import Md5
+from dNG.pas.database.condition_definition import ConditionDefinition
 from dNG.pas.database.connection import Connection
 from dNG.pas.database.instance import Instance
+from dNG.pas.database.instance_iterator import InstanceIterator
 from dNG.pas.database.nothing_matched_exception import NothingMatchedException
+from dNG.pas.database.sort_definition import SortDefinition
 from dNG.pas.database.instances.task import Task as _DbTask
 from dNG.pas.runtime.io_exception import IOException
 from dNG.pas.runtime.type_exception import TypeException
@@ -408,6 +412,59 @@ Sets a timeout for the task.
 	"""
 
 	@staticmethod
+	def _get_default_list_condition_definition():
+	#
+		"""
+Returns the default condition definition used for listings.
+
+:return: (object) ConditionDefinition instance
+:since:  v0.1.02
+		"""
+
+		_return = ConditionDefinition()
+
+		archive_timeout = int(Settings.get("pas_tasks_database_tasks_archive_timeout", 28)) * 86400
+		completed_condition_definition = ConditionDefinition(ConditionDefinition.AND)
+		timestamp = int(time())
+		timestamp_archive = timestamp - archive_timeout
+
+		completed_condition_definition.add_exact_match_condition("status", DatabaseTask.STATUS_COMPLETED)
+		completed_condition_definition.add_greater_than_match_condition("time_scheduled", 0)
+		completed_condition_definition.add_less_than_match_condition("time_scheduled", timestamp_archive)
+
+		_return.add_sub_condition(completed_condition_definition)
+		_return.add_exact_no_match_condition("status", DatabaseTask.STATUS_COMPLETED)
+
+		_return.add_exact_match_condition("timeout", 0)
+		_return.add_greater_than_match_condition("timeout", timestamp)
+
+		return _return
+	#
+
+	@staticmethod
+	def get_list_count(condition_definition = None):
+	#
+		"""
+Returns the count of database entries based on the given condition
+definition. If no separate condition is given all non-completed will be
+returned.
+
+:param condition_definition: ConditionDefinition instance
+
+:return: (int) Number of DatabaseTask entries
+:since:  v0.1.02
+		"""
+
+		with Connection.get_instance() as connection:
+		#
+			db_query = connection.query(sql_count(_DbTask.id))
+			if (condition_definition is None): condition_definition = DatabaseTask._get_default_list_condition_definition()
+
+			return db_query.scalar()
+		#
+	#
+
+	@staticmethod
 	def _load(cls, db_instance):
 	#
 		"""
@@ -533,6 +590,48 @@ Load DatabaseTask value by ID.
 
 		if (_return is None): raise NothingMatchedException("Task ID '{0}' not found".format(tid))
 		return _return
+	#
+
+	@staticmethod
+	def load_list(condition_definition = None, offset = 0, limit = -1, sort_definition = None):
+	#
+		"""
+Loads a list of database instances based on the given condition definition.
+If no separate condition is given all tasks will be returned that are not
+completed or are within the archived time frame.
+
+:param condition_definition: ConditionDefinition instance
+:param offset: SQLAlchemy query offset
+:param limit: SQLAlchemy query limit
+:param sort_definition: SortDefinition instance
+
+:return: (list) List of DatabaseTask instances on success
+:since:  v0.1.02
+		"""
+
+		with Connection.get_instance() as connection:
+		#
+			db_query = connection.query(_DbTask)
+
+			if (condition_definition is None): condition_definition = DatabaseTask._get_default_list_condition_definition()
+
+			db_query = condition_definition.apply(_DbTask, db_query)
+
+			if (sort_definition is None):
+			#
+				sort_definition = SortDefinition([ ( "status", SortDefinition.DESCENDING ),
+				                                   ( "time_scheduled", SortDefinition.DESCENDING ),
+				                                   ( "time_updated", SortDefinition.DESCENDING ),
+				                                   ( "tid", SortDefinition.ASCENDING )
+				                                 ])
+			#
+
+			db_query = sort_definition.apply(_DbTask, db_query)
+			if (offset > 0): db_query = db_query.offset(offset)
+			if (limit > 0): db_query = db_query.limit(limit)
+
+			return InstanceIterator(_DbTask, connection.execute(db_query), instance_class = DatabaseTask)
+		#
 	#
 
 	@staticmethod
