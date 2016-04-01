@@ -59,7 +59,7 @@ SQLAlchemy database instance for Task.
 	"""
 SQLAlchemy table name
 	"""
-	db_schema_version = 1
+	db_schema_version = 2
 	"""
 Database schema version
 	"""
@@ -92,15 +92,15 @@ tasks.params
 	"""
 tasks.time_started
 	"""
-	time_scheduled = Column(DateTime, default = 0, nullable = False)
+	time_scheduled = Column(DateTime, default = 0, index = True, nullable = False)
 	"""
 tasks.time_scheduled
 	"""
-	time_updated = Column(DateTime, default = 0, nullable = False)
+	time_updated = Column(DateTime, default = 0, index = True, nullable = False)
 	"""
 tasks.time_updated
 	"""
-	timeout = Column(DateTime, default = 0, nullable = False)
+	timeout = Column(DateTime, default = 0, index = True, nullable = False)
 	"""
 tasks.timeout
 	"""
@@ -108,7 +108,7 @@ tasks.timeout
 	def __init__(self, *args, **kwargs):
 	#
 		"""
-Constructor __init__(UserProfile)
+Constructor __init__(Task)
 
 :since: v0.1.00
 		"""
