@@ -33,10 +33,8 @@ https://www.direct-netware.de/redirect?licenses;gpl
 
 # pylint: disable=import-error
 
+from collections import deque
 from threading import Thread
-
-try: from queue import Queue
-except ImportError: from Queue import Queue
 
 from dNG.pas.data.settings import Settings
 from dNG.pas.module.named_loader import NamedLoader
@@ -134,7 +132,7 @@ Returns the delay value for rescheduling.
 
 			for context_name in AbstractLrtHook._context_queues:
 			#
-				multiplier += AbstractLrtHook._context_queues[context_name].qsize()
+				multiplier += len(AbstractLrtHook._context_queues[context_name])
 			#
 
 			_return *= (multiplier / AbstractLrtHook._context_limit)
@@ -177,7 +175,6 @@ Returns the manager instance responsible for this hook.
 
 			with AbstractLrtHook._lock:
 			#
-				AbstractLrtHook._context_queues[self.context_id].task_done()
 				task = self._task_get()
 				if (task is None): del(AbstractLrtHook._context_queues[self.context_id])
 			#
@@ -204,34 +201,40 @@ Starts the execution of this hook asynchronously.
 :since: v0.1.00
 		"""
 
+		is_active = False
 		is_queued = False
+
+		if (self.params is None): self.params = kwargs
 
 		with AbstractLrtHook._lock:
 		#
 			if (AbstractLrtHook._context_limit < 1): AbstractLrtHook._context_limit = Settings.get("pas_global_tasks_lrt_limit", 1)
-			if (self.params is None): self.params = kwargs
 
 			if (self.context_id in AbstractLrtHook._context_queues):
 			#
 				if (not self.independent_scheduling):
 				#
-					AbstractLrtHook._context_queues[self.context_id].put(self, False)
+					AbstractLrtHook._context_queues[self.context_id].append(self)
+
+					is_active = True
 					is_queued = True
 				#
 			#
 			elif (len(AbstractLrtHook._context_queues) < AbstractLrtHook._context_limit):
 			#
-				AbstractLrtHook._context_queues[self.context_id] = Queue()
-				AbstractLrtHook._context_queues[self.context_id].put(self, False)
-
-				thread = Thread(target = self._run)
-				thread.start()
+				AbstractLrtHook._context_queues[self.context_id] = deque()
+				AbstractLrtHook._context_queues[self.context_id].append(self)
 
 				is_queued = True
 			#
 		#
 
 		if (not is_queued): task_store.add(_tid, self, self._get_queue_delay())
+		elif (not is_active):
+		#
+			thread = Thread(target = self._run)
+			thread.start()
+		#
 	#
 
 	def _task_get(self):
@@ -243,7 +246,8 @@ Returns the next task from the context queue if any.
 :since:  v0.1.00
 		"""
 
-		return (None if (AbstractLrtHook._context_queues[self.context_id].empty()) else AbstractLrtHook._context_queues[self.context_id].get(False))
+		try: return AbstractLrtHook._context_queues[self.context_id].popleft()
+		except IndexError: return None
 	#
 #
 
