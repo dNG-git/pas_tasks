@@ -179,7 +179,7 @@ Returns the task for the given TID.
 		"""
 Get the implementation specific next "run()" UNIX timestamp.
 
-:return: (int) UNIX timestamp; -1 if no further "run()" is required at the
+:return: (float) UNIX timestamp; -1 if no further "run()" is required at the
          moment
 :since:  v0.1.00
 		"""
@@ -207,7 +207,7 @@ Add a new task with the given TID to the storage for later activation.
 
 		if (self.timer_active):
 		#
-			timestamp = int(time() + timeout)
+			timestamp = time() + timeout
 
 			with self.lock:
 			#
