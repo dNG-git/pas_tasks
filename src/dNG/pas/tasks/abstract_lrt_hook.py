@@ -176,7 +176,12 @@ Returns the manager instance responsible for this hook.
 			with AbstractLrtHook._lock:
 			#
 				task = self._task_get()
-				if (task is None): del(AbstractLrtHook._context_queues[self.context_id])
+
+				if (task is None):
+				#
+					if (self.log_handler is not None): self.log_handler.debug("{0!r} finished context '{1}'", self, self.context_id, context = "pas_tasks")
+					del(AbstractLrtHook._context_queues[self.context_id])
+				#
 			#
 		#
 	#
@@ -215,6 +220,7 @@ Starts the execution of this hook asynchronously.
 				if (not self.independent_scheduling):
 				#
 					AbstractLrtHook._context_queues[self.context_id].append(self)
+					if (self.log_handler is not None): self.log_handler.debug("{0!r} queued with context '{1}'", self, self.context_id, context = "pas_tasks")
 
 					is_active = True
 					is_queued = True
@@ -224,6 +230,7 @@ Starts the execution of this hook asynchronously.
 			#
 				AbstractLrtHook._context_queues[self.context_id] = deque()
 				AbstractLrtHook._context_queues[self.context_id].append(self)
+				if (self.log_handler is not None): self.log_handler.debug("{0!r} initialized in context '{1}'", self, self.context_id, context = "pas_tasks")
 
 				is_queued = True
 			#
@@ -246,8 +253,10 @@ Returns the next task from the context queue if any.
 :since:  v0.1.00
 		"""
 
-		try: return AbstractLrtHook._context_queues[self.context_id].popleft()
-		except IndexError: return None
+		return (AbstractLrtHook._context_queues[self.context_id].popleft()
+		        if (len(AbstractLrtHook._context_queues[self.context_id]) > 0) else
+		        None
+		       )
 	#
 #
 
