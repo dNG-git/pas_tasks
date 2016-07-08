@@ -31,68 +31,63 @@ https://www.direct-netware.de/redirect?licenses;gpl
 #echo(__FILEPATH__)#
 """
 
-# pylint: disable=unused-argument
+from threading import Thread
 
-from dNG.pas.database.schema import Schema
-from dNG.pas.module.named_loader import NamedLoader
-from dNG.pas.plugins.hook import Hook
+from dNG.runtime.exception_log_trap import ExceptionLogTrap
+from dNG.runtime.not_implemented_exception import NotImplementedException
 
-def after_apply_schema(params, last_return = None):
+class AbstractHook(object):
 #
 	"""
-Called for "dNG.pas.Database.applySchema.after"
+The hook instance based task can be used if the the task store is memory
+based.
 
-:param params: Parameter specified
-:param last_return: The return value from the last hook called.
-
-:return: (mixed) Return value
-:since:  v0.1.00
+:author:     direct Netware Group et al.
+:copyright:  direct Netware Group - All rights reserved
+:package:    pas
+:subpackage: tasks
+:since:      v0.2.00
+:license:    https://www.direct-netware.de/redirect?licenses;gpl
+             GNU General Public License 2
 	"""
 
-	task_class = NamedLoader.get_class("dNG.pas.database.instances.Task")
-	Schema.apply_version(task_class)
+	# pylint: disable=unused-argument
 
-	return last_return
-#
+	def run(self, task_store, _tid, **kwargs):
+	#
+		"""
+Starts the execution of this hook synchronously.
 
-def load_all(params, last_return = None):
-#
-	"""
-Load and register all SQLAlchemy objects to generate database tables.
+:return: (mixed) Task result
+:since:  v0.2.00
+		"""
 
-:param params: Parameter specified
-:param last_return: The return value from the last hook called.
+		with ExceptionLogTrap("pas_tasks"): return self._run_hook(**kwargs)
+	#
 
-:return: (mixed) Return value
-:since:  v0.1.00
-	"""
+	def _run_hook(self, **kwargs):
+	#
+		"""
+Hook execution
 
-	NamedLoader.get_class("dNG.pas.database.instances.Task")
-	return last_return
-#
+:return: (mixed) Task result
+:since:  v0.2.00
+		"""
 
-def register_plugin():
-#
-	"""
-Register plugin hooks.
+		raise NotImplementedException()
+	#
 
-:since: v0.1.00
-	"""
+	def start(self, task_store, _tid, **kwargs):
+	#
+		"""
+Starts the execution of this hook asynchronously.
 
-	Hook.register("dNG.pas.Database.applySchema.after", after_apply_schema)
-	Hook.register("dNG.pas.Database.loadAll", load_all)
-#
+:since: v0.2.00
+		"""
 
-def unregister_plugin():
-#
-	"""
-Unregister plugin hooks.
-
-:since: v0.1.00
-	"""
-
-	Hook.unregister("dNG.pas.Database.applySchema.after", after_apply_schema)
-	Hook.unregister("dNG.pas.Database.loadAll", load_all)
+		thread = Thread(target = self.run, args = ( task_store, _tid ), kwargs = kwargs)
+		thread.start()
+	#
 #
 
 ##j## EOF

@@ -33,11 +33,11 @@ https://www.direct-netware.de/redirect?licenses;gpl
 
 # pylint: disable=unused-argument
 
-from dNG.pas.data.tasks.database import Database as DatabaseTasks
-from dNG.pas.data.tasks.memory import Memory as MemoryTasks
-from dNG.pas.plugins.hook import Hook
-from dNG.pas.runtime.thread_lock import ThreadLock
-from dNG.pas.runtime.value_exception import ValueException
+from dNG.data.tasks.database import Database as DatabaseTasks
+from dNG.data.tasks.memory import Memory as MemoryTasks
+from dNG.plugins.hook import Hook
+from dNG.runtime.thread_lock import ThreadLock
+from dNG.runtime.value_exception import ValueException
 
 _lock = ThreadLock()
 """
@@ -61,7 +61,7 @@ Called for "dNG.pas.tasks.Database.add"
 :param last_return: The return value from the last hook called.
 
 :return: (mixed) Return value
-:since:  v0.1.00
+:since:  v0.2.00
 	"""
 
 	# pylint: disable=star-args
@@ -90,7 +90,7 @@ Called for "dNG.pas.Tasks.call"
 :param last_return: The return value from the last hook called.
 
 :return: (mixed) Return value
-:since:  v0.1.00
+:since:  v0.2.00
 	"""
 
 	if (last_return is not None): _return = last_return
@@ -113,7 +113,7 @@ Called for "dNG.pas.tasks.Database.call"
 :param last_return: The return value from the last hook called.
 
 :return: (mixed) Return value
-:since:  v0.1.00
+:since:  v0.2.00
 	"""
 
 	if (last_return is not None): _return = last_return
@@ -136,7 +136,7 @@ Called for "dNG.pas.tasks.Database.get"
 :param last_return: The return value from the last hook called.
 
 :return: (mixed) Return value
-:since:  v0.1.00
+:since:  v0.2.00
 	"""
 
 	if (last_return is not None): _return = last_return
@@ -155,7 +155,7 @@ Called for "dNG.pas.tasks.Database.isRegistered"
 :param last_return: The return value from the last hook called.
 
 :return: (mixed) Return value
-:since:  v0.1.00
+:since:  v0.2.00
 	"""
 
 	if (last_return is not None): _return = last_return
@@ -177,7 +177,7 @@ Called for "dNG.pas.Status.onShutdown"
 :param params: Parameter specified
 :param last_return: The return value from the last hook called.
 
-:since: v0.1.00
+:since: v0.2.00
 	"""
 
 	# global: _lock
@@ -209,7 +209,7 @@ Called for "dNG.pas.Status.onStartup"
 :param params: Parameter specified
 :param last_return: The return value from the last hook called.
 
-:since: v0.1.00
+:since: v0.2.00
 	"""
 
 	# global: _lock
@@ -242,7 +242,7 @@ Called for "dNG.pas.tasks.Database.registerTimeout"
 :param last_return: The return value from the last hook called.
 
 :return: (mixed) Return value
-:since:  v0.1.00
+:since:  v0.2.00
 	"""
 
 	# pylint: disable=star-args
@@ -267,7 +267,7 @@ def register_plugin():
 	"""
 Register plugin hooks.
 
-:since: v0.1.00
+:since: v0.2.00
 	"""
 
 	Hook.register("dNG.pas.Status.onShutdown", on_shutdown)
@@ -292,7 +292,7 @@ Called for "dNG.pas.tasks.Database.remove"
 :param last_return: The return value from the last hook called.
 
 :return: (mixed) Return value
-:since:  v0.1.00
+:since:  v0.2.00
 	"""
 
 	if (last_return is not None): _return = last_return
@@ -311,7 +311,7 @@ Called for "dNG.pas.tasks.Database.reregisterTimeout"
 :param last_return: The return value from the last hook called.
 
 :return: (mixed) Return value
-:since:  v0.1.00
+:since:  v0.2.00
 	"""
 
 	if (last_return is not None): _return = last_return
@@ -330,7 +330,7 @@ Called for "dNG.pas.tasks.Database.unregisterTimeout"
 :param last_return: The return value from the last hook called.
 
 :return: (mixed) Return value
-:since:  v0.1.00
+:since:  v0.2.00
 	"""
 
 	if (last_return is not None): _return = last_return
@@ -345,7 +345,7 @@ def unregister_plugin():
 	"""
 Unregister plugin hooks.
 
-:since: v0.1.00
+:since: v0.2.00
 	"""
 
 	Hook.unregister("dNG.pas.Status.onShutdown", on_shutdown)

@@ -35,9 +35,10 @@ from copy import copy
 from time import time
 from weakref import ref
 
-from dNG.pas.data.binary import Binary
-from dNG.pas.runtime.instance_lock import InstanceLock
-from dNG.pas.tasks.abstract_timed import AbstractTimed
+from dNG.data.binary import Binary
+from dNG.runtime.instance_lock import InstanceLock
+from dNG.tasks.abstract_timed import AbstractTimed
+
 from .abstract import Abstract
 
 class Memory(Abstract, AbstractTimed):
@@ -47,11 +48,11 @@ A "Memory" instance stores tasks in the application memory. Tasks are run
 threaded. Use the LRT implementation for long running or CPU intensive
 ones.
 
-:author:     direct Netware Group
+:author:     direct Netware Group et al.
 :copyright:  direct Netware Group - All rights reserved
 :package:    pas
 :subpackage: tasks
-:since:      v0.1.00
+:since:      v0.2.00
 :license:    https://www.direct-netware.de/redirect?licenses;gpl
              GNU General Public License 2
 	"""
@@ -70,7 +71,7 @@ Tasks weakref instance
 		"""
 Constructor __init__(Memory)
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		AbstractTimed.__init__(self)
@@ -91,7 +92,7 @@ Add a new task with the given TID to the storage for later activation.
 :param hook: Task hook to be called
 :param timeout: Timeout in seconds; None to use global task timeout
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		tid = Binary.str(tid)
@@ -110,7 +111,7 @@ Add a new task with the given TID to the storage for later activation.
 Removes the given TID from the storage.
 
 :return: (bool) True on success
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		# pylint: disable=no-member
@@ -152,7 +153,7 @@ Returns the task for the given TID.
 :param tid: Task ID
 
 :return: (dict) Task definition
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		_return = None
@@ -181,7 +182,7 @@ Get the implementation specific next "run()" UNIX timestamp.
 
 :return: (float) UNIX timestamp; -1 if no further "run()" is required at the
          moment
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		_return = -1
@@ -202,7 +203,7 @@ Add a new task with the given TID to the storage for later activation.
 :param params: Parameter specified
 :param timeout: Timeout in seconds; None to use global task timeout
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		if (self.timer_active):
@@ -260,7 +261,7 @@ Checks if a given task ID is known.
 :param hook: Task hook to be called
 
 :return: (bool) True if defined
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		_return = False
@@ -289,7 +290,7 @@ Registers a new task with the given TID to the storage for later use.
 :param hook: Task hook to be called
 :param timeout: Timeout in seconds; None to use global task timeout
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		tid = Binary.str(tid)
@@ -310,7 +311,7 @@ Removes the given TID from the storage.
 :param tid: Task ID
 
 :return: (bool) True on success
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		tid = Binary.str(tid)
@@ -328,7 +329,7 @@ Updates the task with the given TID to push its expiration time.
 :param tid: Task ID
 
 :return: (bool) True on success
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		tid = Binary.str(tid)
@@ -351,7 +352,7 @@ Updates the task with the given TID to push its expiration time.
 		"""
 Timed task execution
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		task = None
@@ -380,7 +381,7 @@ Removes the given TID from the storage.
 :param tid: Task ID
 
 :return: (bool) True on success
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		tid = Binary.str(tid)
@@ -397,7 +398,7 @@ Removes the given TID from the storage.
 Get the Memory singleton.
 
 :return: (Memory) Object on success
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		_return = None

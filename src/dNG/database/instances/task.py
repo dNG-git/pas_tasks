@@ -36,7 +36,8 @@ from sqlalchemy.types import INT, TEXT, VARCHAR
 from time import time
 from uuid import uuid4 as uuid
 
-from dNG.pas.database.types.date_time import DateTime
+from dNG.database.types.date_time import DateTime
+
 from .abstract import Abstract
 
 class Task(Abstract):
@@ -44,11 +45,11 @@ class Task(Abstract):
 	"""
 SQLAlchemy database instance for Task.
 
-:author:     direct Netware Group
+:author:     direct Netware Group et al.
 :copyright:  (C) direct Netware Group - All rights reserved
 :package:    pas
 :subpackage: tasks
-:since:      v0.1.00
+:since:      v0.2.00
 :license:    https://www.direct-netware.de/redirect?licenses;gpl
              GNU General Public License 2
 	"""
@@ -110,7 +111,7 @@ tasks.timeout
 		"""
 Constructor __init__(Task)
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		Abstract.__init__(self, *args, **kwargs)

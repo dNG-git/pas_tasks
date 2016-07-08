@@ -31,38 +31,38 @@ https://www.direct-netware.de/redirect?licenses;gpl
 #echo(__FILEPATH__)#
 """
 
-from threading import Thread
+from .abstract_hook import AbstractHook
 
-from dNG.pas.runtime.exception_log_trap import ExceptionLogTrap
-from dNG.pas.runtime.not_implemented_exception import NotImplementedException
-
-class AbstractHook(object):
+class Callback(AbstractHook):
 #
 	"""
-The hook instance based task can be used if the the task store is memory
-based.
+The callback task can be used if the the task store is memory based.
 
-:author:     direct Netware Group
+:author:     direct Netware Group et al.
 :copyright:  direct Netware Group - All rights reserved
 :package:    pas
 :subpackage: tasks
-:since:      v0.1.02
+:since:      v0.2.00
 :license:    https://www.direct-netware.de/redirect?licenses;gpl
              GNU General Public License 2
 	"""
 
 	# pylint: disable=unused-argument
 
-	def run(self, task_store, _tid, **kwargs):
+	def __init__(self, callback):
 	#
 		"""
-Starts the execution of this hook synchronously.
+Constructor __init__(Callback)
 
-:return: (mixed) Task result
-:since:  v0.1.02
+:since: v0.2.00
 		"""
 
-		with ExceptionLogTrap("pas_tasks"): return self._run_hook(**kwargs)
+		AbstractHook.__init__(self)
+
+		self.callback = callback
+		"""
+Python callback
+		"""
 	#
 
 	def _run_hook(self, **kwargs):
@@ -71,22 +71,10 @@ Starts the execution of this hook synchronously.
 Hook execution
 
 :return: (mixed) Task result
-:since:  v0.1.02
+:since:  v0.2.00
 		"""
 
-		raise NotImplementedException()
-	#
-
-	def start(self, task_store, _tid, **kwargs):
-	#
-		"""
-Starts the execution of this hook asynchronously.
-
-:since: v0.1.02
-		"""
-
-		thread = Thread(target = self.run, args = ( task_store, _tid ), kwargs = kwargs)
-		thread.start()
+		return self.callback(**kwargs)
 	#
 #
 

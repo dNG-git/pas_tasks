@@ -36,11 +36,12 @@ https://www.direct-netware.de/redirect?licenses;gpl
 from collections import deque
 from threading import Thread
 
-from dNG.pas.data.settings import Settings
-from dNG.pas.module.named_loader import NamedLoader
-from dNG.pas.runtime.exception_log_trap import ExceptionLogTrap
-from dNG.pas.runtime.not_implemented_exception import NotImplementedException
-from dNG.pas.runtime.thread_lock import ThreadLock
+from dNG.data.settings import Settings
+from dNG.module.named_loader import NamedLoader
+from dNG.runtime.exception_log_trap import ExceptionLogTrap
+from dNG.runtime.not_implemented_exception import NotImplementedException
+from dNG.runtime.thread_lock import ThreadLock
+
 from .abstract_hook import AbstractHook
 
 class AbstractLrtHook(AbstractHook):
@@ -49,11 +50,11 @@ class AbstractLrtHook(AbstractHook):
 Long running tasks (LRT) are resource intensive calls where only a limited
 amount should run parallel.
 
-:author:     direct Netware Group
+:author:     direct Netware Group et al.
 :copyright:  direct Netware Group - All rights reserved
 :package:    pas
 :subpackage: tasks
-:since:      v0.1.00
+:since:      v0.2.00
 :license:    https://www.direct-netware.de/redirect?licenses;gpl
              GNU General Public License 2
 	"""
@@ -78,7 +79,7 @@ Thread safety lock
 		"""
 Constructor __init__(AbstractLrtHook)
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		AbstractHook.__init__(self)
@@ -92,7 +93,7 @@ Default timeout for an activated task
 Usually queues are filled and executed as long as new tasks of the same type
 arrive. Set this variable to true to reschedule these tasks independently.
 		"""
-		self.log_handler = NamedLoader.get_singleton("dNG.pas.data.logging.LogHandler", False)
+		self.log_handler = NamedLoader.get_singleton("dNG.data.logging.LogHandler", False)
 		"""
 The LogHandler is called whenever debug messages should be logged or errors
 happened.
@@ -121,7 +122,7 @@ Task ID
 Returns the delay value for rescheduling.
 
 :return: (float) Delay for rescheduling a task
-:since:  v0.1.02
+:since:  v0.2.00
 		"""
 
 		_return = self.min_retry_delay
@@ -149,7 +150,7 @@ Returns the delay value for rescheduling.
 Starts the execution of this hook synchronously.
 
 :return: (mixed) Task result
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		raise NotImplementedException()
@@ -161,7 +162,7 @@ Starts the execution of this hook synchronously.
 Returns the manager instance responsible for this hook.
 
 :return: (object) Hook manager on success
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		# pylint: disable=protected-access
@@ -192,7 +193,7 @@ Returns the manager instance responsible for this hook.
 Hook execution
 
 :return: (mixed) Task result
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		raise NotImplementedException()
@@ -203,7 +204,7 @@ Hook execution
 		"""
 Starts the execution of this hook asynchronously.
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		is_active = False
@@ -250,7 +251,7 @@ Starts the execution of this hook asynchronously.
 Returns the next task from the context queue if any.
 
 :return: (mixed) Task from the same context queue
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		return (AbstractLrtHook._context_queues[self.context_id].popleft()

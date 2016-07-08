@@ -33,10 +33,11 @@ https://www.direct-netware.de/redirect?licenses;gpl
 
 from weakref import ref
 
-from dNG.pas.data.settings import Settings
-from dNG.pas.net.bus.client import Client
-from dNG.pas.runtime.instance_lock import InstanceLock
-from dNG.pas.runtime.operation_not_supported_exception import OperationNotSupportedException
+from dNG.data.settings import Settings
+from dNG.net.bus.client import Client
+from dNG.runtime.instance_lock import InstanceLock
+from dNG.runtime.operation_not_supported_exception import OperationNotSupportedException
+
 from .abstract import Abstract
 from .database import Database
 
@@ -45,11 +46,11 @@ class DatabaseProxy(Abstract):
 	"""
 The task proxy forwards tasks to a background daemon executing it.
 
-:author:     direct Netware Group
+:author:     direct Netware Group et al.
 :copyright:  direct Netware Group - All rights reserved
 :package:    pas
 :subpackage: tasks
-:since:      v0.1.00
+:since:      v0.2.00
 :license:    https://www.direct-netware.de/redirect?licenses;gpl
              GNU General Public License 2
 	"""
@@ -68,7 +69,7 @@ Tasks weakref instance
 		"""
 Constructor __init__(DatabaseProxy)
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		Abstract.__init__(self)
@@ -84,9 +85,9 @@ IPC bus client
 	def __del__(self):
 	#
 		"""
-Destructor __del__(Client)
+Destructor __del__(DatabaseProxy)
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		self.disconnect()
@@ -97,7 +98,7 @@ Destructor __del__(Client)
 		"""
 Opens a bus connection.
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		if (self.client is None): self.client = Client("pas_tasks_daemon")
@@ -108,7 +109,7 @@ Opens a bus connection.
 		"""
 Closes an active bus connection.
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		if (self.client is not None): self.client.disconnect()
@@ -123,7 +124,7 @@ Add a new task with the given TID to the storage for later activation.
 :param hook: Task hook to be called
 :param timeout: Timeout in seconds; None to use global task timeout
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		self.connect()
@@ -139,7 +140,7 @@ Called to initiate a task if its known and valid.
 :param last_return: The return value from the last hook called.
 
 :return: (mixed) Task result; None if not matched
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		self.connect()
@@ -154,7 +155,7 @@ Returns the task for the given TID.
 :param tid: Task ID
 
 :return: (dict) Task definition
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		raise OperationNotSupportedException()
@@ -169,7 +170,7 @@ Checks if a given task ID is known.
 :param hook: Task hook to be called
 
 :return: (bool) True if defined
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		self.connect()
@@ -185,7 +186,7 @@ Registers a new task with the given TID to the storage for later use.
 :param hook: Task hook to be called
 :param timeout: Timeout in seconds; None to use global task timeout
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		self.connect()
@@ -200,7 +201,7 @@ Removes the given TID from the storage.
 :param tid: Task ID
 
 :return: (bool) True on success
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		self.connect()
@@ -213,7 +214,7 @@ Removes the given TID from the storage.
 Updates the task with the given TID to push its expiration time.
 
 :return: (bool) True on success
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		self.connect()
@@ -226,7 +227,7 @@ Updates the task with the given TID to push its expiration time.
 Removes the given TID from the storage.
 
 :return: (bool) True on success
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		self.connect()
@@ -240,7 +241,7 @@ Removes the given TID from the storage.
 Get a database tasks instance.
 
 :return: (object) Database tasks instance on success
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		database_tasks = Database.get_instance()
@@ -254,7 +255,7 @@ Get a database tasks instance.
 Get the DatabaseProxy singleton.
 
 :return: (DatabaseProxy) Object on success
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		_return = None
@@ -280,7 +281,7 @@ Get the DatabaseProxy singleton.
 True if a database tasks instance is available.
 
 :return: (bool) True if available
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		_return = Database.get_instance().is_started()

@@ -31,92 +31,32 @@ https://www.direct-netware.de/redirect?licenses;gpl
 #echo(__FILEPATH__)#
 """
 
-from traceback import format_exception
+from dNG.runtime.not_implemented_exception import NotImplementedException
 
-from .database_task import DatabaseTask
-
-class DatabaseTaskContext(object):
+class Abstract(object):
 #
 	"""
-A "Database" instance stores tasks in the database.
+Tasks are executed with the "run()" method.
 
-:author:     direct Netware Group
+:author:     direct Netware Group et al.
 :copyright:  direct Netware Group - All rights reserved
 :package:    pas
 :subpackage: tasks
-:since:      v0.1.00
+:since:      v0.2.00
 :license:    https://www.direct-netware.de/redirect?licenses;gpl
              GNU General Public License 2
 	"""
 
-	def __init__(self, task):
+	def run(self):
 	#
 		"""
-Constructor __init__(DatabaseTaskContext)
+Starts the execution of this task.
 
-:param task: Database task
-
-:since: v0.1.00
+:return: (mixed) Task result
+:since:  v0.2.00
 		"""
 
-		self.task = task
-		"""
-Database task
-		"""
-	#
-
-	def __enter__(self):
-	#
-		"""
-python.org: Enter the runtime context related to this object.
-
-:since: v0.1.00
-		"""
-
-		try: self.task.set_status(DatabaseTask.STATUS_RUNNING)
-		except Exception:
-		#
-			self.task.set_status(DatabaseTask.STATUS_FAILED)
-			raise
-		#
-		finally: self.task.save()
-	#
-
-	def __exit__(self, exc_type, exc_value, traceback):
-	#
-		"""
-python.org: Exit the runtime context related to this object.
-
-:return: (bool) True to suppress exceptions
-:since:  v0.1.00
-		"""
-
-		if (exc_type is not None or exc_value is not None):
-		#
-			params = self.task.get_params()
-
-			if ("error" not in params):
-			#
-				params['error'] = { "type": "exception",
-				                    "exception": "".join(format_exception(exc_type, exc_value, traceback))
-				                  }
-
-				self.task.set_params(params)
-			#
-
-			self.task.set_status(DatabaseTask.STATUS_FAILED)
-		#
-		elif (self.task.get_status() == DatabaseTask.STATUS_RUNNING):
-		#
-			self.task.set_status(DatabaseTask.STATUS_WAITING
-			                     if (self.task.is_timeout_set()) else
-			                     DatabaseTask.STATUS_COMPLETED
-			                    )
-		#
-
-		self.task.save()
-
-		return False
+		raise NotImplementedException()
 	#
 #
 

@@ -31,24 +31,24 @@ https://www.direct-netware.de/redirect?licenses;gpl
 #echo(__FILEPATH__)#
 """
 
-from dNG.pas.data.settings import Settings
-from dNG.pas.module.named_loader import NamedLoader
-from dNG.pas.plugins.hook import Hook
-from dNG.pas.runtime.not_implemented_exception import NotImplementedException
-from dNG.pas.runtime.thread import Thread
-from dNG.pas.runtime.value_exception import ValueException
-from dNG.pas.tasks.abstract_hook import AbstractHook
+from dNG.data.settings import Settings
+from dNG.module.named_loader import NamedLoader
+from dNG.plugins.hook import Hook
+from dNG.runtime.not_implemented_exception import NotImplementedException
+from dNG.runtime.thread import Thread
+from dNG.runtime.value_exception import ValueException
+from dNG.tasks.abstract_hook import AbstractHook
 
 class Abstract(object):
 #
 	"""
 Abstract class for task stores.
 
-:author:     direct Netware Group
+:author:     direct Netware Group et al.
 :copyright:  direct Netware Group - All rights reserved
 :package:    pas
 :subpackage: tasks
-:since:      v0.1.00
+:since:      v0.2.00
 :license:    https://www.direct-netware.de/redirect?licenses;gpl
              GNU General Public License 2
 	"""
@@ -60,10 +60,10 @@ Abstract class for task stores.
 		"""
 Constructor __init__(Abstract)
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
-		self.log_handler = NamedLoader.get_singleton("dNG.pas.data.logging.LogHandler", False)
+		self.log_handler = NamedLoader.get_singleton("dNG.data.logging.LogHandler", False)
 		"""
 The LogHandler is called whenever debug messages should be logged or errors
 happened.
@@ -83,7 +83,7 @@ Add a new task with the given TID to the storage for later activation.
 :param hook: Task hook to be called
 :param timeout: Timeout in seconds; None to use global task timeout
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		raise NotImplementedException()
@@ -99,7 +99,7 @@ if "last_return" is None.
 :param last_return: The return value from the last hook called.
 
 :return: (mixed) Task result; None if not matched
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		_return = last_return
@@ -137,7 +137,7 @@ Returns the task for the given TID.
 :param tid: Task ID
 
 :return: (dict) Task definition
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		raise NotImplementedException()
@@ -152,7 +152,7 @@ Checks if a given task ID is known.
 :param hook: Task hook to be called
 
 :return: (bool) True if defined
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		raise NotImplementedException()
@@ -167,7 +167,7 @@ Registers a new task with the given TID to the storage for later use.
 :param hook: Task hook to be called
 :param timeout: Timeout in seconds; None to use global task timeout
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		raise NotImplementedException()
@@ -181,7 +181,7 @@ Removes the given TID from the storage.
 :param tid: Task ID
 
 :return: (bool) True on success
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		raise NotImplementedException()
@@ -193,7 +193,7 @@ Removes the given TID from the storage.
 Updates the task with the given TID to push its expiration time.
 
 :return: (bool) True on success
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		raise NotImplementedException()
@@ -207,7 +207,7 @@ Executes a task synchronously.
 :param task_data: Task definition
 
 :return: (mixed) Task result
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		_return = None
@@ -227,7 +227,7 @@ Calls a task asynchronously.
 
 :param task_data: Task definition
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		if ("hook" not in task_data or "params" not in task_data): raise ValueException("Given task is unsupported")
@@ -246,7 +246,7 @@ Calls a task asynchronously.
 Removes the given TID from the storage.
 
 :return: (bool) True on success
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		raise NotImplementedException()
@@ -259,7 +259,7 @@ Removes the given TID from the storage.
 Get a tasks instance.
 
 :return: (object) Task instance on success
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		raise NotImplementedException()

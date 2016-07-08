@@ -34,10 +34,11 @@ https://www.direct-netware.de/redirect?licenses;gpl
 from time import time
 from weakref import ref
 
-from dNG.pas.database.connection import Connection
-from dNG.pas.database.nothing_matched_exception import NothingMatchedException
-from dNG.pas.runtime.instance_lock import InstanceLock
-from dNG.pas.tasks.abstract_timed import AbstractTimed
+from dNG.database.connection import Connection
+from dNG.database.nothing_matched_exception import NothingMatchedException
+from dNG.runtime.instance_lock import InstanceLock
+from dNG.tasks.abstract_timed import AbstractTimed
+
 from .abstract import Abstract
 from .database_task import DatabaseTask
 from .database_task_context import DatabaseTaskContext
@@ -47,11 +48,11 @@ class Database(Abstract, AbstractTimed):
 	"""
 A "Database" instance stores tasks in the database.
 
-:author:     direct Netware Group
+:author:     direct Netware Group et al.
 :copyright:  direct Netware Group - All rights reserved
 :package:    pas
 :subpackage: tasks
-:since:      v0.1.00
+:since:      v0.2.00
 :license:    https://www.direct-netware.de/redirect?licenses;gpl
              GNU General Public License 2
 	"""
@@ -70,7 +71,7 @@ Tasks weakref instance
 		"""
 Constructor __init__(Database)
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		AbstractTimed.__init__(self)
@@ -86,7 +87,7 @@ Add a new task with the given TID to the storage for later activation.
 :param hook: Task hook to be called
 :param timeout: Timeout in seconds; None to use global task timeout
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		if (timeout is None): timeout = self.task_timeout
@@ -107,7 +108,7 @@ if "last_return" is None.
 :param last_return: The return value from the last hook called.
 
 :return: (mixed) Task result; None if not matched
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		_return = last_return
@@ -131,7 +132,7 @@ Returns the task for the given TID.
 :param tid: Task ID
 
 :return: (dict) Task definition
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		task = DatabaseTask.load_tid(tid)
@@ -154,7 +155,7 @@ Get the implementation specific next "run()" UNIX timestamp.
 
 :return: (float) UNIX timestamp; -1 if no further "run()" is required at the
          moment
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		_return = -1
@@ -180,7 +181,7 @@ Add a new task with the given TID to the storage for later activation.
 :param params: Parameter specified
 :param timeout: Timeout in seconds; None to use global task timeout
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		if (self.timer_active):
@@ -222,7 +223,7 @@ Checks if a given task ID is known.
 :param hook: Task hook to be called
 
 :return: (bool) True if defined
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		return (False if (DatabaseTask.load_tid(tid) is None) else True)
@@ -237,7 +238,7 @@ Registers a new task with the given TID to the storage for later use.
 :param hook: Task hook to be called
 :param timeout: Timeout in seconds; None to use global task timeout
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		if (timeout is None): timeout = self.task_timeout
@@ -257,7 +258,7 @@ Removes the given TID from the storage.
 :param tid: Task ID
 
 :return: (bool) True on success
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		# pylint: disable=broad-except
@@ -281,7 +282,7 @@ Removes the given TID from the storage.
 Updates the task with the given TID to push its expiration time.
 
 :return: (bool) True on success
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		_return = False
@@ -309,7 +310,7 @@ Updates the task with the given TID to push its expiration time.
 		"""
 Timed task execution
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		with self.lock:
@@ -347,7 +348,7 @@ Executes a task synchronously.
 :param task_data: Task definition
 
 :return: (mixed) Task result
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		_return = None
@@ -370,7 +371,7 @@ Starts the database tasks scheduler.
 :param params: Parameter specified
 :param last_return: The return value from the last hook called.
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		DatabaseTask._reset_stale_running()
@@ -383,7 +384,7 @@ Starts the database tasks scheduler.
 Removes the given TID from the storage.
 
 :return: (bool) True on success
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		# pylint: disable=broad-except
@@ -408,7 +409,7 @@ Removes the given TID from the storage.
 Get the Database singleton.
 
 :return: (Database) Object on success
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		_return = None

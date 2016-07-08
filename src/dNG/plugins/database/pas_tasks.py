@@ -31,33 +31,68 @@ https://www.direct-netware.de/redirect?licenses;gpl
 #echo(__FILEPATH__)#
 """
 
-from dNG.pas.runtime.not_implemented_exception import NotImplementedException
+# pylint: disable=unused-argument
 
-class Abstract(object):
+from dNG.database.schema import Schema
+from dNG.module.named_loader import NamedLoader
+from dNG.plugins.hook import Hook
+
+def after_apply_schema(params, last_return = None):
 #
 	"""
-Tasks are executed with the "run()" method.
+Called for "dNG.pas.Database.applySchema.after"
 
-:author:     direct Netware Group
-:copyright:  direct Netware Group - All rights reserved
-:package:    pas
-:subpackage: tasks
-:since:      v0.1.00
-:license:    https://www.direct-netware.de/redirect?licenses;gpl
-             GNU General Public License 2
+:param params: Parameter specified
+:param last_return: The return value from the last hook called.
+
+:return: (mixed) Return value
+:since:  v0.2.00
 	"""
 
-	def run(self):
-	#
-		"""
-Starts the execution of this task.
+	task_class = NamedLoader.get_class("dNG.database.instances.Task")
+	Schema.apply_version(task_class)
 
-:return: (mixed) Task result
-:since:  v0.1.00
-		"""
+	return last_return
+#
 
-		raise NotImplementedException()
-	#
+def load_all(params, last_return = None):
+#
+	"""
+Load and register all SQLAlchemy objects to generate database tables.
+
+:param params: Parameter specified
+:param last_return: The return value from the last hook called.
+
+:return: (mixed) Return value
+:since:  v0.2.00
+	"""
+
+	NamedLoader.get_class("dNG.database.instances.Task")
+	return last_return
+#
+
+def register_plugin():
+#
+	"""
+Register plugin hooks.
+
+:since: v0.2.00
+	"""
+
+	Hook.register("dNG.pas.Database.applySchema.after", after_apply_schema)
+	Hook.register("dNG.pas.Database.loadAll", load_all)
+#
+
+def unregister_plugin():
+#
+	"""
+Unregister plugin hooks.
+
+:since: v0.2.00
+	"""
+
+	Hook.unregister("dNG.pas.Database.applySchema.after", after_apply_schema)
+	Hook.unregister("dNG.pas.Database.loadAll", load_all)
 #
 
 ##j## EOF

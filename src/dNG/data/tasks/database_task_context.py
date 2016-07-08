@@ -31,50 +31,92 @@ https://www.direct-netware.de/redirect?licenses;gpl
 #echo(__FILEPATH__)#
 """
 
-from .abstract_hook import AbstractHook
+from traceback import format_exception
 
-class Callback(AbstractHook):
+from .database_task import DatabaseTask
+
+class DatabaseTaskContext(object):
 #
 	"""
-The callback task can be used if the the task store is memory based.
+A "Database" instance stores tasks in the database.
 
-:author:     direct Netware Group
+:author:     direct Netware Group et al.
 :copyright:  direct Netware Group - All rights reserved
 :package:    pas
 :subpackage: tasks
-:since:      v0.1.02
+:since:      v0.2.00
 :license:    https://www.direct-netware.de/redirect?licenses;gpl
              GNU General Public License 2
 	"""
 
-	# pylint: disable=unused-argument
-
-	def __init__(self, callback):
+	def __init__(self, task):
 	#
 		"""
-Constructor __init__(Callback)
+Constructor __init__(DatabaseTaskContext)
 
-:since: v0.1.02
+:param task: Database task
+
+:since: v0.2.00
 		"""
 
-		AbstractHook.__init__(self)
-
-		self.callback = callback
+		self.task = task
 		"""
-Python callback
+Database task
 		"""
 	#
 
-	def _run_hook(self, **kwargs):
+	def __enter__(self):
 	#
 		"""
-Hook execution
+python.org: Enter the runtime context related to this object.
 
-:return: (mixed) Task result
-:since:  v0.1.02
+:since: v0.2.00
 		"""
 
-		return self.callback(**kwargs)
+		try: self.task.set_status(DatabaseTask.STATUS_RUNNING)
+		except Exception:
+		#
+			self.task.set_status(DatabaseTask.STATUS_FAILED)
+			raise
+		#
+		finally: self.task.save()
+	#
+
+	def __exit__(self, exc_type, exc_value, traceback):
+	#
+		"""
+python.org: Exit the runtime context related to this object.
+
+:return: (bool) True to suppress exceptions
+:since:  v0.2.00
+		"""
+
+		if (exc_type is not None or exc_value is not None):
+		#
+			params = self.task.get_params()
+
+			if ("error" not in params):
+			#
+				params['error'] = { "type": "exception",
+				                    "exception": "".join(format_exception(exc_type, exc_value, traceback))
+				                  }
+
+				self.task.set_params(params)
+			#
+
+			self.task.set_status(DatabaseTask.STATUS_FAILED)
+		#
+		elif (self.task.get_status() == DatabaseTask.STATUS_RUNNING):
+		#
+			self.task.set_status(DatabaseTask.STATUS_WAITING
+			                     if (self.task.is_timeout_set()) else
+			                     DatabaseTask.STATUS_COMPLETED
+			                    )
+		#
+
+		self.task.save()
+
+		return False
 	#
 #
 

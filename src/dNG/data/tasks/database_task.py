@@ -37,30 +37,30 @@ from time import time
 from sqlalchemy.sql.expression import and_, or_
 from sqlalchemy.sql.functions import count as sql_count
 
+from dNG.data.binary import Binary
 from dNG.data.json_resource import JsonResource
-from dNG.pas.data.binary import Binary
-from dNG.pas.data.settings import Settings
-from dNG.pas.data.text.md5 import Md5
-from dNG.pas.database.condition_definition import ConditionDefinition
-from dNG.pas.database.connection import Connection
-from dNG.pas.database.instance import Instance
-from dNG.pas.database.instance_iterator import InstanceIterator
-from dNG.pas.database.nothing_matched_exception import NothingMatchedException
-from dNG.pas.database.sort_definition import SortDefinition
-from dNG.pas.database.instances.task import Task as _DbTask
-from dNG.pas.runtime.io_exception import IOException
-from dNG.pas.runtime.type_exception import TypeException
+from dNG.data.settings import Settings
+from dNG.data.text.md5 import Md5
+from dNG.database.condition_definition import ConditionDefinition
+from dNG.database.connection import Connection
+from dNG.database.instance import Instance
+from dNG.database.instance_iterator import InstanceIterator
+from dNG.database.instances.task import Task as _DbTask
+from dNG.database.nothing_matched_exception import NothingMatchedException
+from dNG.database.sort_definition import SortDefinition
+from dNG.runtime.io_exception import IOException
+from dNG.runtime.type_exception import TypeException
 
 class DatabaseTask(Instance):
 #
 	"""
 A "Database" instance stores tasks in the database.
 
-:author:     direct Netware Group
+:author:     direct Netware Group et al.
 :copyright:  direct Netware Group - All rights reserved
 :package:    pas
 :subpackage: tasks
-:since:      v0.1.00
+:since:      v0.2.00
 :license:    https://www.direct-netware.de/redirect?licenses;gpl
              GNU General Public License 2
 	"""
@@ -101,7 +101,7 @@ Constructor __init__(Database)
 
 :param db_instance: Encapsulated SQLAlchemy database instance
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		Instance.__init__(self, db_instance)
@@ -144,7 +144,7 @@ Task ID
 Returns the task hook to be called.
 
 :return: (str) Task hook
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		return self.hook
@@ -156,7 +156,7 @@ Returns the task hook to be called.
 Returns the task parameter used.
 
 :return: (dict) Task parameter
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		return self.params
@@ -167,7 +167,7 @@ Returns the task parameter used.
 Returns the task status.
 
 :return: (int) Task status
-:since:  v0.1.00
+:since:  v0.2.00
 	"""
 
 	def get_tid(self):
@@ -176,7 +176,7 @@ Returns the task status.
 Returns the task ID.
 
 :return: (str) Task ID
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		return self.tid
@@ -187,7 +187,7 @@ Returns the task ID.
 Returns the UNIX timestamp this task will be executed.
 
 :return: (int) UNIX timestamp
-:since:  v0.1.00
+:since:  v0.2.00
 	"""
 
 	get_time_scheduled = Instance._wrap_getter("time_scheduled")
@@ -195,7 +195,7 @@ Returns the UNIX timestamp this task will be executed.
 Returns the UNIX timestamp this task will be executed.
 
 :return: (int) UNIX timestamp
-:since:  v0.1.00
+:since:  v0.2.00
 	"""
 
 	get_time_updated = Instance._wrap_getter("time_updated")
@@ -203,7 +203,7 @@ Returns the UNIX timestamp this task will be executed.
 Returns the UNIX timestamp this task will be executed.
 
 :return: (int) UNIX timestamp
-:since:  v0.1.00
+:since:  v0.2.00
 	"""
 
 	get_timeout = Instance._wrap_getter("timeout")
@@ -211,7 +211,7 @@ Returns the UNIX timestamp this task will be executed.
 Returns the UNIX timestamp this task will time out.
 
 :return: (int) UNIX timestamp
-:since:  v0.1.00
+:since:  v0.2.00
 	"""
 
 	def is_reloadable(self):
@@ -221,7 +221,7 @@ Returns true if the instance can be reloaded automatically in another
 thread.
 
 :return: (bool) True if reloadable
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		_return = True
@@ -240,7 +240,7 @@ thread.
 Returns true if the task timed out.
 
 :return: (bool) True if timed out
-:sinve:  v0.1.00
+:sinve:  v0.2.00
 		"""
 
 		timeout = self.get_timeout()
@@ -253,7 +253,7 @@ Returns true if the task timed out.
 Returns true if the task has a timeout value.
 
 :return: (bool) True if timeout set
-:sinve:  v0.1.00
+:sinve:  v0.2.00
 		"""
 
 		return (self.get_timeout() > 0)
@@ -264,7 +264,7 @@ Returns true if the task has a timeout value.
 		"""
 Implementation of the reloading SQLAlchemy database instance logic.
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		if (self.local.db_instance is None):
@@ -280,7 +280,7 @@ Implementation of the reloading SQLAlchemy database instance logic.
 		"""
 Saves changes of the database task instance.
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		with self:
@@ -303,7 +303,7 @@ Saves changes of the database task instance.
 		"""
 Sets values given as keyword arguments to this method.
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		with self:
@@ -331,7 +331,7 @@ Sets the task hook to be called.
 
 :param hook: Task hook
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		self.hook = hook
@@ -343,7 +343,7 @@ Sets the task name.
 
 :param value: Task name
 
-:since: v0.1.00
+:since: v0.2.00
 	"""
 
 	def set_params(self, params):
@@ -353,7 +353,7 @@ Sets the task parameter.
 
 :param params: Task parameter
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		if (not isinstance(params, dict)): raise TypeException("Parameter given are invalid")
@@ -366,7 +366,7 @@ Sets the task status.
 
 :param value: Task status
 
-:since: v0.1.00
+:since: v0.2.00
 	"""
 
 	def set_status_completed(self):
@@ -374,7 +374,7 @@ Sets the task status.
 		"""
 Sets the task status to "completed".
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		self.set_data_attributes(status = DatabaseTask.STATUS_COMPLETED)
@@ -387,7 +387,7 @@ Sets the task ID.
 
 :param _id: Task ID
 
-:since: v0.1.00
+:since: v0.2.00
 		"""
 
 		self.tid = tid
@@ -399,7 +399,7 @@ Sets the time the task is scheduled to be executed.
 
 :param value: UNIX timestamp
 
-:since: v0.1.00
+:since: v0.2.00
 	"""
 
 	set_timeout = Instance._wrap_setter("timeout")
@@ -408,7 +408,7 @@ Sets a timeout for the task.
 
 :param value: UNIX timestamp
 
-:since: v0.1.00
+:since: v0.2.00
 	"""
 
 	@staticmethod
@@ -418,7 +418,7 @@ Sets a timeout for the task.
 Returns the default condition definition used for listings.
 
 :return: (object) ConditionDefinition instance
-:since:  v0.1.02
+:since:  v0.2.00
 		"""
 
 		_return = ConditionDefinition()
@@ -452,7 +452,7 @@ returned.
 :param condition_definition: ConditionDefinition instance
 
 :return: (int) Number of DatabaseTask entries
-:since:  v0.1.02
+:since:  v0.2.00
 		"""
 
 		with Connection.get_instance() as connection:
@@ -474,7 +474,7 @@ Load DatabaseTask entry from database.
 :param db_instance: SQLAlchemy database instance
 
 :return: (object) DatabaseTask instance on success
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		_return = None
@@ -521,7 +521,7 @@ Load DatabaseTask value by entry ID.
 :param _id: Task entry ID
 
 :return: (object) DatabaseTask instance on success
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		if (_id is None): raise NothingMatchedException("Task entry ID is invalid")
@@ -542,7 +542,7 @@ Load DatabaseTask to be executed next.
 :param status: Task status
 
 :return: (object) DatabaseTask instance on success
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		if (status is None): status = DatabaseTask.STATUS_WAITING
@@ -577,7 +577,7 @@ Load DatabaseTask value by ID.
 :param tid: Task ID
 
 :return: (object) DatabaseTask instance on success
-:since:  v0.1.00
+:since:  v0.2.00
 		"""
 
 		if (tid is None): raise NothingMatchedException("Task ID is invalid")
@@ -606,7 +606,7 @@ completed or are within the archived time frame.
 :param sort_definition: SortDefinition instance
 
 :return: (list) List of DatabaseTask instances on success
-:since:  v0.1.02
+:since:  v0.2.00
 		"""
 
 		with Connection.get_instance() as connection:
@@ -640,7 +640,7 @@ completed or are within the archived time frame.
 		"""
 Resets all stale tasks with the "running" status.
 
-:since:  v0.1.00
+:since: v0.2.00
 		"""
 
 		with Connection.get_instance() as connection:
