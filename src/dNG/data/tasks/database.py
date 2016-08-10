@@ -42,6 +42,7 @@ from dNG.tasks.abstract_timed import AbstractTimed
 from .abstract import Abstract
 from .database_task import DatabaseTask
 from .database_task_context import DatabaseTaskContext
+from dNG.tasks.database_lrt_hook import DatabaseLrtHook
 
 class Database(Abstract, AbstractTimed):
 #
@@ -137,7 +138,7 @@ Returns the task for the given TID.
 
 		task = DatabaseTask.load_tid(tid)
 
-		_return = { "hook": task.get_hook(),
+		_return = { "hook": task._get_hook(),
 		            "params": task.get_params(),
 		            "tid": tid,
 		            "_task": task
@@ -189,7 +190,16 @@ Add a new task with the given TID to the storage for later activation.
 			task = DatabaseTask()
 			task.set_tid(tid)
 			task.set_name(tid)
-			task.set_hook(hook)
+
+			if (isinstance(hook, DatabaseLrtHook)):
+			#
+				task._set_hook(hook.get_hook())
+
+				params.update(hook.get_params())
+				params['_lrt_hook'] = True
+			#
+			else: task._set_hook(hook)
+
 			task.set_params(params)
 
 			if (time_scheduled is not None):
@@ -206,11 +216,7 @@ Add a new task with the given TID to the storage for later activation.
 
 			task.save()
 
-			time_to_execution = (None if (time_scheduled is None) else time_scheduled - int(time()))
-
-			if (time_to_execution is not None
-			    and (self.timer_timeout < 0 or self.timer_timeout > time_to_execution)
-			   ): self.update_timestamp(time_scheduled)
+			if (time_scheduled is not None): self.update_timestamp(time_scheduled)
 		#
 	#
 
@@ -329,7 +335,7 @@ Timed task execution
 				task.set_status(DatabaseTask.STATUS_QUEUED)
 				task.save()
 
-				task_data = { "hook": task.get_hook(),
+				task_data = { "hook": task._get_hook(),
 				              "params": task.get_params(),
 				              "_task": task
 				            }
@@ -355,8 +361,7 @@ Executes a task synchronously.
 
 		if (isinstance(task_data.get("_task"), DatabaseTask)):
 		#
-			task_context = DatabaseTaskContext(task_data['_task'])
-			with task_context: _return = Abstract._run_task(self, task_data)
+			with DatabaseTaskContext(task_data['_task']): _return = Abstract._run_task(self, task_data)
 		#
 		else: _return = Abstract._run_task(self, task_data)
 
