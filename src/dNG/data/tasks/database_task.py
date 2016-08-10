@@ -48,6 +48,7 @@ from dNG.database.instance_iterator import InstanceIterator
 from dNG.database.instances.task import Task as _DbTask
 from dNG.database.nothing_matched_exception import NothingMatchedException
 from dNG.database.sort_definition import SortDefinition
+from dNG.module.named_loader import NamedLoader
 from dNG.runtime.io_exception import IOException
 from dNG.runtime.type_exception import TypeException
 
@@ -138,16 +139,21 @@ Task ID
 		if (self.params is None): self.params = { }
 	#
 
-	def get_hook(self):
+	def _get_hook(self):
 	#
 		"""
 Returns the task hook to be called.
 
-:return: (str) Task hook
+:return: (mixed) Task hook either as str or an instance of "AbstractHook"
 :since:  v0.2.00
 		"""
 
-		return self.hook
+		_return = (NamedLoader.get_instance("dNG.tasks.DatabaseLrtHook", hook = self.hook, **self.params)
+		           if (self.params.get("_lrt_hook", False)) else
+		           self.hook
+		          )
+
+		return _return
 	#
 
 	def get_params(self):
@@ -324,7 +330,7 @@ Sets values given as keyword arguments to this method.
 		#
 	#
 
-	def set_hook(self, hook):
+	def _set_hook(self, hook):
 	#
 		"""
 Sets the task hook to be called.

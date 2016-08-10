@@ -33,10 +33,13 @@ https://www.direct-netware.de/redirect?licenses;gpl
 
 from weakref import ref
 
+from dNG.data.binary import Binary
 from dNG.data.settings import Settings
 from dNG.net.bus.client import Client
 from dNG.runtime.instance_lock import InstanceLock
 from dNG.runtime.operation_not_supported_exception import OperationNotSupportedException
+from dNG.runtime.type_exception import TypeException
+from dNG.tasks.database_lrt_hook import DatabaseLrtHook
 
 from .abstract import Abstract
 from .database import Database
@@ -127,8 +130,10 @@ Add a new task with the given TID to the storage for later activation.
 :since: v0.2.00
 		"""
 
+		params = self._get_hook_proxy_params(hook, timeout, kwargs)
+
 		self.connect()
-		self.client.request("dNG.pas.tasks.Database.add", tid = tid, hook = hook, timeout = timeout, kwargs = kwargs)
+		self.client.request("dNG.pas.tasks.Database.add", tid = tid, **params)
 	#
 
 	def call(self, params = None, last_return = None):
@@ -161,6 +166,43 @@ Returns the task for the given TID.
 		raise OperationNotSupportedException()
 	#
 
+	def _get_hook_proxy_params(self, hook, timeout = None, kwargs = None):
+	#
+		"""
+Returns serializable parameters for the database proxy.
+
+:param hook: Task hook to be called
+:param timeout: Timeout in seconds; None to use global task timeout
+:param kwargs: Keyword arguments
+
+:return: (dict)
+:since:  v0.2.00
+		"""
+
+		_return = { }
+
+		if (isinstance(hook, DatabaseLrtHook)):
+		#
+			_return['hook'] = hook.get_hook()
+
+			_return['kwargs'] = ({ } if (kwargs is None) else kwargs)
+			_return['kwargs'].update(hook.get_params())
+			_return['kwargs']['_lrt_hook'] = True
+		#
+		else:
+		#
+			hook = Binary.str(hook)
+			if (type(hook) is not str): raise TypeException("Hook given is invalid")
+
+			_return['hook'] = hook
+			if (kwargs is not None): _return['kwargs'] = kwargs
+		#
+
+		if (timeout is not None): _return['timeout'] = timeout
+
+		return _return
+	#
+
 	def is_registered(self, tid, hook = None):
 	#
 		"""
@@ -173,8 +215,10 @@ Checks if a given task ID is known.
 :since:  v0.2.00
 		"""
 
+		params = self._get_hook_proxy_params(hook)
+
 		self.connect()
-		return (True if (self.client.request("dNG.pas.tasks.Database.isRegistered", tid = tid, hook = hook) == True) else False)
+		return (True if (self.client.request("dNG.pas.tasks.Database.isRegistered", tid = tid, **params) == True) else False)
 	#
 
 	def register_timeout(self, tid, hook, timeout = None, **kwargs):
@@ -189,8 +233,10 @@ Registers a new task with the given TID to the storage for later use.
 :since: v0.2.00
 		"""
 
+		params = self._get_hook_proxy_params(hook, timeout, kwargs)
+
 		self.connect()
-		self.client.request("dNG.pas.tasks.Database.registerTimeout", tid = tid, hook = hook, timeout = timeout, kwargs = kwargs)
+		self.client.request("dNG.pas.tasks.Database.registerTimeout", tid = tid, **params)
 	#
 
 	def remove(self, tid):
