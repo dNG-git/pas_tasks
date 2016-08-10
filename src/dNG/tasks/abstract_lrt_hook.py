@@ -116,6 +116,33 @@ Task ID
 		"""
 	#
 
+	def _get_task_or_finish(self):
+	#
+		"""
+Returns the next task from the context queue if any. Otherwise finish the
+execution.
+
+:return: (mixed) Task from the same context queue; None otherwise
+:since:  v0.2.00
+		"""
+
+		with AbstractLrtHook._lock:
+		#
+			_return = (AbstractLrtHook._context_queues[self.context_id].popleft()
+			           if (len(AbstractLrtHook._context_queues[self.context_id]) > 0) else
+			           None
+			          )
+
+			if (_return is None):
+			#
+				del(AbstractLrtHook._context_queues[self.context_id])
+				if (self.log_handler is not None): self.log_handler.debug("{0!r} finished context '{1}'", self, self.context_id, context = "pas_tasks")
+			#
+		#
+
+		return _return
+	#
+
 	def _get_queue_delay(self):
 	#
 		"""
@@ -167,23 +194,14 @@ Returns the manager instance responsible for this hook.
 
 		# pylint: disable=protected-access
 
-		with AbstractLrtHook._lock: task = self._task_get()
+		task = self._get_task_or_finish()
 
 		while (task is not None):
 		#
 			if (self.log_handler is not None): self.log_handler.debug("{0!r} is executing tasks with context '{1}'", self, self.context_id, context = "pas_tasks")
 			with ExceptionLogTrap("pas_tasks"): task._run_hook()
 
-			with AbstractLrtHook._lock:
-			#
-				task = self._task_get()
-
-				if (task is None):
-				#
-					if (self.log_handler is not None): self.log_handler.debug("{0!r} finished context '{1}'", self, self.context_id, context = "pas_tasks")
-					del(AbstractLrtHook._context_queues[self.context_id])
-				#
-			#
+			task = self._get_task_or_finish()
 		#
 	#
 
@@ -243,21 +261,6 @@ Starts the execution of this hook asynchronously.
 			thread = Thread(target = self._run)
 			thread.start()
 		#
-	#
-
-	def _task_get(self):
-	#
-		"""
-Returns the next task from the context queue if any.
-
-:return: (mixed) Task from the same context queue
-:since:  v0.2.00
-		"""
-
-		return (AbstractLrtHook._context_queues[self.context_id].popleft()
-		        if (len(AbstractLrtHook._context_queues[self.context_id]) > 0) else
-		        None
-		       )
 	#
 #
 
