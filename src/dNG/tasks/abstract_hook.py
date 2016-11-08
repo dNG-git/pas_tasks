@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-##j## BOF
 
 """
 direct PAS
@@ -37,8 +36,7 @@ from dNG.runtime.exception_log_trap import ExceptionLogTrap
 from dNG.runtime.not_implemented_exception import NotImplementedException
 
 class AbstractHook(object):
-#
-	"""
+    """
 The hook instance based task can be used if the the task store is memory
 based.
 
@@ -49,45 +47,40 @@ based.
 :since:      v0.2.00
 :license:    https://www.direct-netware.de/redirect?licenses;gpl
              GNU General Public License 2
-	"""
+    """
 
-	# pylint: disable=unused-argument
+    # pylint: disable=unused-argument
 
-	def run(self, task_store, _tid, **kwargs):
-	#
-		"""
+    def run(self, task_store, _tid, **kwargs):
+        """
 Starts the execution of this hook synchronously.
 
 :return: (mixed) Task result
 :since:  v0.2.00
-		"""
+        """
 
-		with ExceptionLogTrap("pas_tasks"): return self._run_hook(**kwargs)
-	#
+        with ExceptionLogTrap("pas_tasks"): return self._run_hook(**kwargs)
+    #
 
-	def _run_hook(self, **kwargs):
-	#
-		"""
+    def _run_hook(self, **kwargs):
+        """
 Hook execution
 
 :return: (mixed) Task result
 :since:  v0.2.00
-		"""
+        """
 
-		raise NotImplementedException()
-	#
+        raise NotImplementedException()
+    #
 
-	def start(self, task_store, _tid, **kwargs):
-	#
-		"""
+    def start(self, task_store, _tid, **kwargs):
+        """
 Starts the execution of this hook asynchronously.
 
 :since: v0.2.00
-		"""
+        """
 
-		thread = Thread(target = self.run, args = ( task_store, _tid ), kwargs = kwargs)
-		thread.start()
-	#
+        thread = Thread(target = self.run, args = ( task_store, _tid ), kwargs = kwargs)
+        thread.start()
+    #
 #
-
-##j## EOF

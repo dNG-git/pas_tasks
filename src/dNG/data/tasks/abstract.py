@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-##j## BOF
 
 """
 direct PAS
@@ -40,8 +39,7 @@ from dNG.runtime.value_exception import ValueException
 from dNG.tasks.abstract_hook import AbstractHook
 
 class Abstract(object):
-#
-	"""
+    """
 Abstract class for task stores.
 
 :author:     direct Netware Group et al.
@@ -51,32 +49,30 @@ Abstract class for task stores.
 :since:      v0.2.00
 :license:    https://www.direct-netware.de/redirect?licenses;gpl
              GNU General Public License 2
-	"""
+    """
 
-	# pylint: disable=unused-argument
+    # pylint: disable=unused-argument
 
-	def __init__(self):
-	#
-		"""
+    def __init__(self):
+        """
 Constructor __init__(Abstract)
 
 :since: v0.2.00
-		"""
+        """
 
-		self.log_handler = NamedLoader.get_singleton("dNG.data.logging.LogHandler", False)
-		"""
+        self.log_handler = NamedLoader.get_singleton("dNG.data.logging.LogHandler", False)
+        """
 The LogHandler is called whenever debug messages should be logged or errors
 happened.
-		"""
-		self.task_timeout = int(Settings.get("pas_tasks_timeout", 900))
-		"""
+        """
+        self.task_timeout = int(Settings.get("pas_tasks_timeout", 900))
+        """
 Default timeout for an activated task
-		"""
-	#
+        """
+    #
 
-	def add(self, tid, hook, timeout = None, **kwargs):
-	#
-		"""
+    def add(self, tid, hook, timeout = None, **kwargs):
+        """
 Add a new task with the given TID to the storage for later activation.
 
 :param tid: Task ID
@@ -84,14 +80,13 @@ Add a new task with the given TID to the storage for later activation.
 :param timeout: Timeout in seconds; None to use global task timeout
 
 :since: v0.2.00
-		"""
+        """
 
-		raise NotImplementedException()
-	#
+        raise NotImplementedException()
+    #
 
-	def call(self, params, last_return = None):
-	#
-		"""
+    def call(self, params, last_return = None):
+        """
 Called to initiate a task if its known and valid. A task is only executed
 if "last_return" is None.
 
@@ -100,52 +95,47 @@ if "last_return" is None.
 
 :return: (mixed) Task result; None if not matched
 :since:  v0.2.00
-		"""
+        """
 
-		_return = last_return
+        _return = last_return
 
-		if (_return is None and "tid" in params):
-		#
-			task = self.get(params['tid'])
+        if (_return is None and "tid" in params):
+            task = self.get(params['tid'])
 
-			if (task is None): is_valid = False
-			else:
-			#
-				is_valid = (True
-				            if ("client" not in task['params']
-				                or ("client" in params and params['client'] == task['params']['client'])
-				               )
-				            else False
-				           )
-			#
+            if (task is None): is_valid = False
+            else:
+                is_valid = (True
+                            if ("client" not in task['params']
+                                or ("client" in params and params['client'] == task['params']['client'])
+                               )
+                            else False
+                           )
+            #
 
-			if (is_valid):
-			#
-				if ("_timeout" in task): self.reregister_timeout(params['tid'])
-				_return = self._run_task(task)
-			#
-		#
+            if (is_valid):
+                if ("_timeout" in task): self.reregister_timeout(params['tid'])
+                _return = self._run_task(task)
+            #
+        #
 
-		return _return
-	#
+        return _return
+    #
 
-	def get(self, tid):
-	#
-		"""
+    def get(self, tid):
+        """
 Returns the task for the given TID.
 
 :param tid: Task ID
 
 :return: (dict) Task definition
 :since:  v0.2.00
-		"""
+        """
 
-		raise NotImplementedException()
-	#
+        raise NotImplementedException()
+    #
 
-	def is_registered(self, tid, hook = None):
-	#
-		"""
+    def is_registered(self, tid, hook = None):
+        """
 Checks if a given task ID is known.
 
 :param tid: Task ID
@@ -153,14 +143,13 @@ Checks if a given task ID is known.
 
 :return: (bool) True if defined
 :since:  v0.2.00
-		"""
+        """
 
-		raise NotImplementedException()
-	#
+        raise NotImplementedException()
+    #
 
-	def register_timeout(self, tid, hook, timeout = None, **params):
-	#
-		"""
+    def register_timeout(self, tid, hook, timeout = None, **params):
+        """
 Registers a new task with the given TID to the storage for later use.
 
 :param tid: Task ID
@@ -168,102 +157,93 @@ Registers a new task with the given TID to the storage for later use.
 :param timeout: Timeout in seconds; None to use global task timeout
 
 :since: v0.2.00
-		"""
+        """
 
-		raise NotImplementedException()
-	#
+        raise NotImplementedException()
+    #
 
-	def remove(self, tid):
-	#
-		"""
+    def remove(self, tid):
+        """
 Removes the given TID from the storage.
 
 :param tid: Task ID
 
 :return: (bool) True on success
 :since:  v0.2.00
-		"""
+        """
 
-		raise NotImplementedException()
-	#
+        raise NotImplementedException()
+    #
 
-	def reregister_timeout(self, tid):
-	#
-		"""
+    def reregister_timeout(self, tid):
+        """
 Updates the task with the given TID to push its expiration time.
 
 :return: (bool) True on success
 :since:  v0.2.00
-		"""
+        """
 
-		raise NotImplementedException()
-	#
+        raise NotImplementedException()
+    #
 
-	def _run_task(self, task_data):
-	#
-		"""
+    def _run_task(self, task_data):
+        """
 Executes a task synchronously.
 
 :param task_data: Task definition
 
 :return: (mixed) Task result
 :since:  v0.2.00
-		"""
+        """
 
-		_return = None
+        _return = None
 
-		if ("hook" not in task_data or "params" not in task_data): raise ValueException("Given task is unsupported")
+        if ("hook" not in task_data or "params" not in task_data): raise ValueException("Given task is unsupported")
 
-		if (isinstance(task_data['hook'], AbstractHook)): _return = task_data['hook'].run(self, **task_data['params'])
-		else: _return = Hook.call_one(task_data['hook'], **task_data['params'])
+        if (isinstance(task_data['hook'], AbstractHook)): _return = task_data['hook'].run(self, **task_data['params'])
+        else: _return = Hook.call_one(task_data['hook'], **task_data['params'])
 
-		return _return
-	#
+        return _return
+    #
 
-	def _start_task(self, task_data):
-	#
-		"""
+    def _start_task(self, task_data):
+        """
 Calls a task asynchronously.
 
 :param task_data: Task definition
 
 :since: v0.2.00
-		"""
+        """
 
-		if ("hook" not in task_data or "params" not in task_data): raise ValueException("Given task is unsupported")
+        if ("hook" not in task_data or "params" not in task_data): raise ValueException("Given task is unsupported")
 
-		if (isinstance(task_data['hook'], AbstractHook)): task_data['hook'].start(self, **task_data['params'])
-		else:
-		#
-			thread = Thread(target = self._run_task, args = ( task_data, ))
-			thread.start()
-		#
-	#
+        if (isinstance(task_data['hook'], AbstractHook)): task_data['hook'].start(self, **task_data['params'])
+        else:
+            thread = Thread(target = self._run_task, args = ( task_data, ))
+            thread.start()
+        #
+    #
 
-	def unregister_timeout(self, tid):
-	#
-		"""
+    def unregister_timeout(self, tid):
+        """
 Removes the given TID from the storage.
 
 :return: (bool) True on success
 :since:  v0.2.00
-		"""
+        """
 
-		raise NotImplementedException()
-	#
+        raise NotImplementedException()
+    #
 
-	@staticmethod
-	def get_instance():
-	#
-		"""
+    @staticmethod
+    def get_instance():
+        """
 Get a tasks instance.
 
 :return: (object) Task instance on success
 :since:  v0.2.00
-		"""
+        """
 
-		raise NotImplementedException()
-	#
+        raise NotImplementedException()
+    #
 #
-
-##j## EOF

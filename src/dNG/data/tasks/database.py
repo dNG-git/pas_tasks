@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-##j## BOF
 
 """
 direct PAS
@@ -45,8 +44,7 @@ from .database_task_context import DatabaseTaskContext
 from dNG.tasks.database_lrt_hook import DatabaseLrtHook
 
 class Database(Abstract, AbstractTimed):
-#
-	"""
+    """
 A "Database" instance stores tasks in the database.
 
 :author:     direct Netware Group et al.
@@ -56,32 +54,30 @@ A "Database" instance stores tasks in the database.
 :since:      v0.2.00
 :license:    https://www.direct-netware.de/redirect?licenses;gpl
              GNU General Public License 2
-	"""
+    """
 
-	_instance_lock = InstanceLock()
-	"""
+    _instance_lock = InstanceLock()
+    """
 Thread safety lock
-	"""
-	_weakref_instance = None
-	"""
+    """
+    _weakref_instance = None
+    """
 Tasks weakref instance
-	"""
+    """
 
-	def __init__(self):
-	#
-		"""
+    def __init__(self):
+        """
 Constructor __init__(Database)
 
 :since: v0.2.00
-		"""
+        """
 
-		AbstractTimed.__init__(self)
-		Abstract.__init__(self)
-	#
+        AbstractTimed.__init__(self)
+        Abstract.__init__(self)
+    #
 
-	def add(self, tid, hook, timeout = None, **kwargs):
-	#
-		"""
+    def add(self, tid, hook, timeout = None, **kwargs):
+        """
 Add a new task with the given TID to the storage for later activation.
 
 :param tid: Task ID
@@ -89,19 +85,18 @@ Add a new task with the given TID to the storage for later activation.
 :param timeout: Timeout in seconds; None to use global task timeout
 
 :since: v0.2.00
-		"""
+        """
 
-		if (timeout is None): timeout = self.task_timeout
-		timestamp = int(time() + timeout)
+        if (timeout is None): timeout = self.task_timeout
+        timestamp = int(time() + timeout)
 
-		params = kwargs
-		self._insert(tid, hook, params, timestamp)
-		if (self.log_handler is not None): self.log_handler.debug("{0!r} registered TID '{1}' with target {2!r} and timeout '{3}'", self, tid, hook, timeout, context = "pas_tasks")
-	#
+        params = kwargs
+        self._insert(tid, hook, params, timestamp)
+        if (self.log_handler is not None): self.log_handler.debug("{0!r} registered TID '{1}' with target {2!r} and timeout '{3}'", self, tid, hook, timeout, context = "pas_tasks")
+    #
 
-	def call(self, params, last_return = None):
-	#
-		"""
+    def call(self, params, last_return = None):
+        """
 Called to initiate a task if its known and valid. A task is only executed
 if "last_return" is None.
 
@@ -110,119 +105,106 @@ if "last_return" is None.
 
 :return: (mixed) Task result; None if not matched
 :since:  v0.2.00
-		"""
+        """
 
-		_return = last_return
+        _return = last_return
 
-		if (_return is None and "tid" in params):
-		#
-			task = self.get(params['tid'])
-			task_status = (DatabaseTask.STATUS_UNKNOWN if (task is None) else task['_task'].get_status())
+        if (_return is None and "tid" in params):
+            task = self.get(params['tid'])
+            task_status = (DatabaseTask.STATUS_UNKNOWN if (task is None) else task['_task'].get_status())
 
-			if (task_status == DatabaseTask.STATUS_WAITING): _return = Abstract.call(self, params)
-		#
+            if (task_status == DatabaseTask.STATUS_WAITING): _return = Abstract.call(self, params)
+        #
 
-		return _return
-	#
+        return _return
+    #
 
-	def get(self, tid):
-	#
-		"""
+    def get(self, tid):
+        """
 Returns the task for the given TID.
 
 :param tid: Task ID
 
 :return: (dict) Task definition
 :since:  v0.2.00
-		"""
+        """
 
-		task = DatabaseTask.load_tid(tid)
+        task = DatabaseTask.load_tid(tid)
 
-		_return = { "hook": task._get_hook(),
-		            "params": task.get_params(),
-		            "tid": tid,
-		            "_task": task
-		          }
+        _return = { "hook": task._get_hook(),
+                    "params": task.get_params(),
+                    "tid": tid,
+                    "_task": task
+                  }
 
-		if ("_timeout" in _return['params']): _return['_timeout'] = _return['params']['_timeout']
+        if ("_timeout" in _return['params']): _return['_timeout'] = _return['params']['_timeout']
 
-		return _return
-	#
+        return _return
+    #
 
-	def _get_next_update_timestamp(self):
-	#
-		"""
+    def _get_next_update_timestamp(self):
+        """
 Get the implementation specific next "run()" UNIX timestamp.
 
 :return: (float) UNIX timestamp; -1 if no further "run()" is required at the
          moment
 :since:  v0.2.00
-		"""
+        """
 
-		_return = -1
+        _return = -1
 
-		with Connection.get_instance():
-		#
-			try:
-			#
-				task = DatabaseTask.load_next()
-				_return = task.get_time_scheduled()
-			#
-			except NothingMatchedException: pass
-		#
+        with Connection.get_instance():
+            try:
+                task = DatabaseTask.load_next()
+                _return = task.get_time_scheduled()
+            except NothingMatchedException: pass
+        #
 
-		return _return
-	#
+        return _return
+    #
 
-	def _insert(self, tid, hook, params, time_scheduled = None, timeout = None):
-	#
-		"""
+    def _insert(self, tid, hook, params, time_scheduled = None, timeout = None):
+        """
 Add a new task with the given TID to the storage for later activation.
 
 :param params: Parameter specified
 :param timeout: Timeout in seconds; None to use global task timeout
 
 :since: v0.2.00
-		"""
+        """
 
-		if (self.timer_active):
-		#
-			task = DatabaseTask()
-			task.set_tid(tid)
-			task.set_name(tid)
+        if (self.timer_active):
+            task = DatabaseTask()
+            task.set_tid(tid)
+            task.set_name(tid)
 
-			if (isinstance(hook, DatabaseLrtHook)):
-			#
-				task._set_hook(hook.get_hook())
+            if (isinstance(hook, DatabaseLrtHook)):
+                task._set_hook(hook.get_hook())
 
-				params.update(hook.get_params())
-				params['_lrt_hook'] = True
-			#
-			else: task._set_hook(hook)
+                params.update(hook.get_params())
+                params['_lrt_hook'] = True
+            else: task._set_hook(hook)
 
-			task.set_params(params)
+            task.set_params(params)
 
-			if (time_scheduled is not None):
-			#
-				time_scheduled = int(time_scheduled)
-				task.set_time_scheduled(time_scheduled)
-			#
+            if (time_scheduled is not None):
+                time_scheduled = int(time_scheduled)
+                task.set_time_scheduled(time_scheduled)
+            #
 
-			if (timeout is not None):
-			#
-				timeout = int(timeout)
-				task.set_timeout(timeout)
-			#
+            if (timeout is not None):
+                timeout = int(timeout)
+                task.set_timeout(timeout)
+            #
 
-			task.save()
+            task.save()
 
-			if (time_scheduled is not None): self.update_timestamp(time_scheduled)
-		#
-	#
+            if (time_scheduled is not None): self.update_timestamp(time_scheduled)
+        #
+    #
 
-	def is_registered(self, tid, hook = None):
-	#
-		"""
+    def is_registered(self, tid, hook = None):
+        """
 Checks if a given task ID is known.
 
 :param tid: Task ID
@@ -230,14 +212,13 @@ Checks if a given task ID is known.
 
 :return: (bool) True if defined
 :since:  v0.2.00
-		"""
+        """
 
-		return (False if (DatabaseTask.load_tid(tid) is None) else True)
-	#
+        return (False if (DatabaseTask.load_tid(tid) is None) else True)
+    #
 
-	def register_timeout(self, tid, hook, timeout = None, **kwargs):
-	#
-		"""
+    def register_timeout(self, tid, hook, timeout = None, **kwargs):
+        """
 Registers a new task with the given TID to the storage for later use.
 
 :param tid: Task ID
@@ -245,193 +226,170 @@ Registers a new task with the given TID to the storage for later use.
 :param timeout: Timeout in seconds; None to use global task timeout
 
 :since: v0.2.00
-		"""
+        """
 
-		if (timeout is None): timeout = self.task_timeout
-		timeout_time = int(time() + timeout)
+        if (timeout is None): timeout = self.task_timeout
+        timeout_time = int(time() + timeout)
 
-		params = kwargs
-		params['_timeout'] = timeout
-		self._insert(tid, hook, params, timeout = timeout_time)
-		if (self.log_handler is not None): self.log_handler.debug("{0!r} registered TID '{1}' with target {2!r}", self, tid, hook, context = "pas_tasks")
-	#
+        params = kwargs
+        params['_timeout'] = timeout
+        self._insert(tid, hook, params, timeout = timeout_time)
+        if (self.log_handler is not None): self.log_handler.debug("{0!r} registered TID '{1}' with target {2!r}", self, tid, hook, context = "pas_tasks")
+    #
 
-	def remove(self, tid):
-	#
-		"""
+    def remove(self, tid):
+        """
 Removes the given TID from the storage.
 
 :param tid: Task ID
 
 :return: (bool) True on success
 :since:  v0.2.00
-		"""
+        """
 
-		# pylint: disable=broad-except
+        # pylint: disable=broad-except
 
-		_return = False
+        _return = False
 
-		try:
-		#
-			task = DatabaseTask.load_tid(tid)
-			_return = task.delete()
-		#
-		except NothingMatchedException: pass
+        try:
+            task = DatabaseTask.load_tid(tid)
+            _return = task.delete()
+        except NothingMatchedException: pass
 
-		if (_return and self.log_handler is not None): self.log_handler.debug("{0!r} removed TID '{1}'", self, tid, context = "pas_tasks")
-		return _return
-	#
+        if (_return and self.log_handler is not None): self.log_handler.debug("{0!r} removed TID '{1}'", self, tid, context = "pas_tasks")
+        return _return
+    #
 
-	def reregister_timeout(self, tid):
-	#
-		"""
+    def reregister_timeout(self, tid):
+        """
 Updates the task with the given TID to push its expiration time.
 
 :return: (bool) True on success
 :since:  v0.2.00
-		"""
+        """
 
-		_return = False
+        _return = False
 
-		try:
-		#
-			task = DatabaseTask.load_tid(tid)
-			params = task.get_params()
+        try:
+            task = DatabaseTask.load_tid(tid)
+            params = task.get_params()
 
-			if ("_timeout" in params):
-			#
-				task.set_timeout(time() + params['_timeout'])
-				task.save()
+            if ("_timeout" in params):
+                task.set_timeout(time() + params['_timeout'])
+                task.save()
 
-				_return = True
-			#
-		#
-		except NothingMatchedException: pass
+                _return = True
+            #
+        except NothingMatchedException: pass
 
-		return _return
-	#
+        return _return
+    #
 
-	def run(self):
-	#
-		"""
+    def run(self):
+        """
 Timed task execution
 
 :since: v0.2.00
-		"""
+        """
 
-		with self.lock:
-		#
-			task = None
-			task_data = None
+        with self.lock:
+            task = None
+            task_data = None
 
-			if (self.timer_active):
-			#
-				try: task = DatabaseTask.load_next()
-				except NothingMatchedException: pass
-			#
+            if (self.timer_active):
+                try: task = DatabaseTask.load_next()
+                except NothingMatchedException: pass
+            #
 
-			if (task is not None):
-			#
-				task.set_status(DatabaseTask.STATUS_QUEUED)
-				task.save()
+            if (task is not None):
+                task.set_status(DatabaseTask.STATUS_QUEUED)
+                task.save()
 
-				task_data = { "hook": task._get_hook(),
-				              "params": task.get_params(),
-				              "_task": task
-				            }
-			#
+                task_data = { "hook": task._get_hook(),
+                              "params": task.get_params(),
+                              "_task": task
+                            }
+            #
 
-			AbstractTimed.run(self)
-			if (task_data is not None): self._start_task(task_data)
-		#
-	#
+            AbstractTimed.run(self)
+            if (task_data is not None): self._start_task(task_data)
+        #
+    #
 
-	def _run_task(self, task_data):
-	#
-		"""
+    def _run_task(self, task_data):
+        """
 Executes a task synchronously.
 
 :param task_data: Task definition
 
 :return: (mixed) Task result
 :since:  v0.2.00
-		"""
+        """
 
-		_return = None
+        _return = None
 
-		if (isinstance(task_data.get("_task"), DatabaseTask)):
-		#
-			with DatabaseTaskContext(task_data['_task']): _return = Abstract._run_task(self, task_data)
-		#
-		else: _return = Abstract._run_task(self, task_data)
+        if (isinstance(task_data.get("_task"), DatabaseTask)):
+            with DatabaseTaskContext(task_data['_task']): _return = Abstract._run_task(self, task_data)
+        else: _return = Abstract._run_task(self, task_data)
 
-		return _return
-	#
+        return _return
+    #
 
-	def start(self, params = None, last_return = None):
-	#
-		"""
+    def start(self, params = None, last_return = None):
+        """
 Starts the database tasks scheduler.
 
 :param params: Parameter specified
 :param last_return: The return value from the last hook called.
 
 :since: v0.2.00
-		"""
+        """
 
-		DatabaseTask._reset_stale_running()
-		AbstractTimed.start(self, params, last_return)
-	#
+        DatabaseTask._reset_stale_running()
+        AbstractTimed.start(self, params, last_return)
+    #
 
-	def unregister_timeout(self, tid):
-	#
-		"""
+    def unregister_timeout(self, tid):
+        """
 Removes the given TID from the storage.
 
 :return: (bool) True on success
 :since:  v0.2.00
-		"""
+        """
 
-		# pylint: disable=broad-except
+        # pylint: disable=broad-except
 
-		_return = False
+        _return = False
 
-		try:
-		#
-			task = DatabaseTask.load_tid(tid)
-			_return = task.delete()
-		#
-		except NothingMatchedException: pass
+        try:
+            task = DatabaseTask.load_tid(tid)
+            _return = task.delete()
+        except NothingMatchedException: pass
 
-		if (_return and self.log_handler is not None): self.log_handler.debug("{0!r} removed TID '{1}'", self, tid, context = "pas_tasks")
-		return _return
-	#
+        if (_return and self.log_handler is not None): self.log_handler.debug("{0!r} removed TID '{1}'", self, tid, context = "pas_tasks")
+        return _return
+    #
 
-	@staticmethod
-	def get_instance():
-	#
-		"""
+    @staticmethod
+    def get_instance():
+        """
 Get the Database singleton.
 
 :return: (Database) Object on success
 :since:  v0.2.00
-		"""
+        """
 
-		_return = None
+        _return = None
 
-		with Database._instance_lock:
-		#
-			if (Database._weakref_instance is not None): _return = Database._weakref_instance()
+        with Database._instance_lock:
+            if (Database._weakref_instance is not None): _return = Database._weakref_instance()
 
-			if (_return is None):
-			#
-				_return = Database()
-				Database._weakref_instance = ref(_return)
-			#
-		#
+            if (_return is None):
+                _return = Database()
+                Database._weakref_instance = ref(_return)
+            #
+        #
 
-		return _return
-	#
+        return _return
+    #
 #
-
-##j## EOF

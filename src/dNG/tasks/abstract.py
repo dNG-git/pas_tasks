@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-##j## BOF
 
 """
 direct PAS
@@ -34,8 +33,7 @@ https://www.direct-netware.de/redirect?licenses;gpl
 from dNG.runtime.not_implemented_exception import NotImplementedException
 
 class Abstract(object):
-#
-	"""
+    """
 Tasks are executed with the "run()" method.
 
 :author:     direct Netware Group et al.
@@ -45,19 +43,16 @@ Tasks are executed with the "run()" method.
 :since:      v0.2.00
 :license:    https://www.direct-netware.de/redirect?licenses;gpl
              GNU General Public License 2
-	"""
+    """
 
-	def run(self):
-	#
-		"""
+    def run(self):
+        """
 Starts the execution of this task.
 
 :return: (mixed) Task result
 :since:  v0.2.00
-		"""
+        """
 
-		raise NotImplementedException()
-	#
+        raise NotImplementedException()
+    #
 #
-
-##j## EOF

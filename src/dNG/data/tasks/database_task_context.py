@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-##j## BOF
 
 """
 direct PAS
@@ -36,8 +35,7 @@ from traceback import format_exception
 from .database_task import DatabaseTask
 
 class DatabaseTaskContext(object):
-#
-	"""
+    """
 A "Database" instance stores tasks in the database.
 
 :author:     direct Netware Group et al.
@@ -47,77 +45,66 @@ A "Database" instance stores tasks in the database.
 :since:      v0.2.00
 :license:    https://www.direct-netware.de/redirect?licenses;gpl
              GNU General Public License 2
-	"""
+    """
 
-	def __init__(self, task):
-	#
-		"""
+    def __init__(self, task):
+        """
 Constructor __init__(DatabaseTaskContext)
 
 :param task: Database task
 
 :since: v0.2.00
-		"""
+        """
 
-		self.task = task
-		"""
+        self.task = task
+        """
 Database task
-		"""
-	#
+        """
+    #
 
-	def __enter__(self):
-	#
-		"""
+    def __enter__(self):
+        """
 python.org: Enter the runtime context related to this object.
 
 :since: v0.2.00
-		"""
+        """
 
-		try: self.task.set_status(DatabaseTask.STATUS_RUNNING)
-		except Exception:
-		#
-			self.task.set_status(DatabaseTask.STATUS_FAILED)
-			raise
-		#
-		finally: self.task.save()
-	#
+        try: self.task.set_status(DatabaseTask.STATUS_RUNNING)
+        except Exception:
+            self.task.set_status(DatabaseTask.STATUS_FAILED)
+            raise
+        finally: self.task.save()
+    #
 
-	def __exit__(self, exc_type, exc_value, traceback):
-	#
-		"""
+    def __exit__(self, exc_type, exc_value, traceback):
+        """
 python.org: Exit the runtime context related to this object.
 
 :return: (bool) True to suppress exceptions
 :since:  v0.2.00
-		"""
+        """
 
-		if (exc_type is not None or exc_value is not None):
-		#
-			params = self.task.get_params()
+        if (exc_type is not None or exc_value is not None):
+            params = self.task.get_params()
 
-			if ("error" not in params):
-			#
-				params['error'] = { "type": "exception",
-				                    "exception": "".join(format_exception(exc_type, exc_value, traceback))
-				                  }
+            if ("error" not in params):
+                params['error'] = { "type": "exception",
+                                    "exception": "".join(format_exception(exc_type, exc_value, traceback))
+                                  }
 
-				self.task.set_params(params)
-			#
+                self.task.set_params(params)
+            #
 
-			self.task.set_status(DatabaseTask.STATUS_FAILED)
-		#
-		elif (self.task.get_status() == DatabaseTask.STATUS_RUNNING):
-		#
-			self.task.set_status(DatabaseTask.STATUS_WAITING
-			                     if (self.task.is_timeout_set()) else
-			                     DatabaseTask.STATUS_COMPLETED
-			                    )
-		#
+            self.task.set_status(DatabaseTask.STATUS_FAILED)
+        elif (self.task.get_status() == DatabaseTask.STATUS_RUNNING):
+            self.task.set_status(DatabaseTask.STATUS_WAITING
+                                 if (self.task.is_timeout_set()) else
+                                 DatabaseTask.STATUS_COMPLETED
+                                )
+        #
 
-		self.task.save()
+        self.task.save()
 
-		return False
-	#
+        return False
+    #
 #
-
-##j## EOF

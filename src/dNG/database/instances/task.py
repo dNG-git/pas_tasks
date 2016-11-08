@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-##j## BOF
 
 """
 direct PAS
@@ -41,8 +40,7 @@ from dNG.database.types.date_time import DateTime
 from .abstract import Abstract
 
 class Task(Abstract):
-#
-	"""
+    """
 SQLAlchemy database instance for Task.
 
 :author:     direct Netware Group et al.
@@ -52,76 +50,73 @@ SQLAlchemy database instance for Task.
 :since:      v0.2.00
 :license:    https://www.direct-netware.de/redirect?licenses;gpl
              GNU General Public License 2
-	"""
+    """
 
-	# pylint: disable=invalid-name
+    # pylint: disable=invalid-name
 
-	__tablename__ = "{0}_task".format(Abstract.get_table_prefix())
-	"""
+    __tablename__ = "{0}_task".format(Abstract.get_table_prefix())
+    """
 SQLAlchemy table name
-	"""
-	db_schema_version = 2
-	"""
+    """
+    db_schema_version = 2
+    """
 Database schema version
-	"""
+    """
 
-	id = Column(VARCHAR(32), primary_key = True)
-	"""
+    id = Column(VARCHAR(32), primary_key = True)
+    """
 tasks.id
-	"""
-	tid = Column(VARCHAR(32), index = True, server_default = "", nullable = False)
-	"""
+    """
+    tid = Column(VARCHAR(32), index = True, server_default = "", nullable = False)
+    """
 tasks.tid
-	"""
-	name = Column(VARCHAR(100), index = True, server_default = "", nullable = False)
-	"""
+    """
+    name = Column(VARCHAR(100), index = True, server_default = "", nullable = False)
+    """
 tasks.name
-	"""
-	status = Column(INT, index = True, server_default = "96", nullable = False)
-	"""
+    """
+    status = Column(INT, index = True, server_default = "96", nullable = False)
+    """
 tasks.status = STATUS_WAITING = 96
-	"""
-	hook = Column(VARCHAR(255), index = True, server_default = "", nullable = False)
-	"""
+    """
+    hook = Column(VARCHAR(255), index = True, server_default = "", nullable = False)
+    """
 tasks.hook
-	"""
-	params = Column(TEXT)
-	"""
+    """
+    params = Column(TEXT)
+    """
 tasks.params
-	"""
-	time_started = Column(DateTime, default = 0, nullable = False)
-	"""
+    """
+    time_started = Column(DateTime, default = 0, nullable = False)
+    """
 tasks.time_started
-	"""
-	time_scheduled = Column(DateTime, default = 0, index = True, nullable = False)
-	"""
+    """
+    time_scheduled = Column(DateTime, default = 0, index = True, nullable = False)
+    """
 tasks.time_scheduled
-	"""
-	time_updated = Column(DateTime, default = 0, index = True, nullable = False)
-	"""
+    """
+    time_updated = Column(DateTime, default = 0, index = True, nullable = False)
+    """
 tasks.time_updated
-	"""
-	timeout = Column(DateTime, default = 0, index = True, nullable = False)
-	"""
+    """
+    timeout = Column(DateTime, default = 0, index = True, nullable = False)
+    """
 tasks.timeout
-	"""
+    """
 
-	def __init__(self, *args, **kwargs):
-	#
-		"""
+    def __init__(self, *args, **kwargs):
+        """
 Constructor __init__(Task)
 
 :since: v0.2.00
-		"""
+        """
 
-		Abstract.__init__(self, *args, **kwargs)
+        Abstract.__init__(self, *args, **kwargs)
 
-		if (self.id is None): self.id = uuid().hex
+        if (self.id is None): self.id = uuid().hex
 
-		timestamp = int(time())
-		if (self.time_started is None): self.time_started = timestamp
-		if (self.time_updated is None): self.time_updated = timestamp
-	#
+        timestamp = int(time())
+        if (self.time_started is None): self.time_started = timestamp
+        if (self.time_updated is None): self.time_updated = timestamp
+    #
 #
-
-##j## EOF

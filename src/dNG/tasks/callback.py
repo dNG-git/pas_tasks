@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-##j## BOF
 
 """
 direct PAS
@@ -34,8 +33,7 @@ https://www.direct-netware.de/redirect?licenses;gpl
 from .abstract_hook import AbstractHook
 
 class Callback(AbstractHook):
-#
-	"""
+    """
 The callback task can be used if the the task store is memory based.
 
 :author:     direct Netware Group et al.
@@ -45,37 +43,33 @@ The callback task can be used if the the task store is memory based.
 :since:      v0.2.00
 :license:    https://www.direct-netware.de/redirect?licenses;gpl
              GNU General Public License 2
-	"""
+    """
 
-	# pylint: disable=unused-argument
+    # pylint: disable=unused-argument
 
-	def __init__(self, callback):
-	#
-		"""
+    def __init__(self, callback):
+        """
 Constructor __init__(Callback)
 
 :since: v0.2.00
-		"""
+        """
 
-		AbstractHook.__init__(self)
+        AbstractHook.__init__(self)
 
-		self.callback = callback
-		"""
+        self.callback = callback
+        """
 Python callback
-		"""
-	#
+        """
+    #
 
-	def _run_hook(self, **kwargs):
-	#
-		"""
+    def _run_hook(self, **kwargs):
+        """
 Hook execution
 
 :return: (mixed) Task result
 :since:  v0.2.00
-		"""
+        """
 
-		return self.callback(**kwargs)
-	#
+        return self.callback(**kwargs)
+    #
 #
-
-##j## EOF

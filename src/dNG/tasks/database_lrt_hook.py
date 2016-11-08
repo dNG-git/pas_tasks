@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-##j## BOF
 
 """
 direct PAS
@@ -39,8 +38,7 @@ from dNG.plugins.hook import Hook
 from .abstract_lrt_hook import AbstractLrtHook
 
 class DatabaseLrtHook(AbstractLrtHook):
-#
-	"""
+    """
 A "DatabaseLrtHook" is an database stored long running task.
 
 :author:     direct Netware Group et al.
@@ -50,82 +48,72 @@ A "DatabaseLrtHook" is an database stored long running task.
 :since:      v0.2.00
 :license:    https://www.direct-netware.de/redirect?licenses;gpl
              GNU General Public License 2
-	"""
+    """
 
-	def __init__(self, hook, **kwargs):
-	#
-		"""
+    def __init__(self, hook, **kwargs):
+        """
 Constructor __init__(DatabaseLrtHook)
 
 :since: v0.2.00
-		"""
+        """
 
-		AbstractLrtHook.__init__(self)
+        AbstractLrtHook.__init__(self)
 
-		self.hook = hook
-		"""
-UPnP encapsulated VFS URL
-		"""
-		self.params = kwargs
-		"""
-UPnP encapsulated VFS URL
-		"""
+        self.hook = hook
+        """
+Hook
+        """
+        self.params = kwargs
+        """
+Hook parameters
+        """
 
-		self.context_id = hook
-		self.independent_scheduling = True
-	#
+        self.context_id = hook
+        self.independent_scheduling = True
+    #
 
-	def get_hook(self):
-	#
-		"""
+    def get_hook(self):
+        """
 Returns the hook being called of this long running task instance.
 
 :return: (str) Hook
 :since:  v0.2.00
-		"""
+        """
 
-		return self.hook
-	#
+        return self.hook
+    #
 
-	def get_params(self):
-	#
-		"""
+    def get_params(self):
+        """
 Returns the hook parameters used when being called.
 
 :return: (dict) Hook parameters
 :since:  v0.2.00
-		"""
+        """
 
-		return self.params
-	#
+        return self.params
+    #
 
-	def _run_hook(self):
-	#
-		"""
+    def _run_hook(self):
+        """
 Hook execution
 
 :since: v0.2.00
-		"""
+        """
 
-		task = None
-		tid = self.params.get("_tid")
+        task = None
+        tid = self.params.get("_tid")
 
-		if (tid is not None):
-		#
-			try: task = DatabaseTask.load_tid(tid)
-			except NothingMatchedException: pass
-		#
+        if (tid is not None):
+            try: task = DatabaseTask.load_tid(tid)
+            except NothingMatchedException: pass
+        #
 
-		if (task is None):
-		#
-			if (self.log_handler is not None): self.log_handler.warning("{0!r} is executed without a database task entry", self, context = "pas_tasks")
-			Hook.call_one(self.hook, **self.params)
-		#
-		else:
-		#
-			with DatabaseTaskContext(task): Hook.call_one(self.hook, **self.params)
-		#
-	#
+        if (task is None):
+            if (self.log_handler is not None): self.log_handler.warning("{0!r} is executed without a database task entry", self, context = "pas_tasks")
+            Hook.call_one(self.hook, **self.params)
+        else:
+            with DatabaseTaskContext(task): Hook.call_one(self.hook, **self.params)
+        #
+    #
 #
-
-##j## EOF
