@@ -36,14 +36,13 @@ from weakref import ref
 from dNG.database.connection import Connection
 from dNG.database.nothing_matched_exception import NothingMatchedException
 from dNG.runtime.instance_lock import InstanceLock
-from dNG.tasks.abstract_timed import AbstractTimed
+from dNG.tasks.persistent_lrt_hook import PersistentLrtHook
 
-from .abstract import Abstract
+from .abstract_persistent import AbstractPersistent
 from .database_task import DatabaseTask
 from .database_task_context import DatabaseTaskContext
-from dNG.tasks.database_lrt_hook import DatabaseLrtHook
 
-class Database(Abstract, AbstractTimed):
+class Database(AbstractPersistent):
     """
 A "Database" instance stores tasks in the database.
 
@@ -64,17 +63,6 @@ Thread safety lock
     """
 Tasks weakref instance
     """
-
-    def __init__(self):
-        """
-Constructor __init__(Database)
-
-:since: v0.2.00
-        """
-
-        AbstractTimed.__init__(self)
-        Abstract.__init__(self)
-    #
 
     def add(self, tid, hook, timeout = None, **kwargs):
         """
@@ -113,7 +101,7 @@ if "last_return" is None.
             task = self.get(params['tid'])
             task_status = (DatabaseTask.STATUS_UNKNOWN if (task is None) else task['_task'].get_status())
 
-            if (task_status == DatabaseTask.STATUS_WAITING): _return = Abstract.call(self, params)
+            if (task_status == DatabaseTask.STATUS_WAITING): _return = AbstractPersistent.call(self, params)
         #
 
         return _return
@@ -178,7 +166,7 @@ Add a new task with the given TID to the storage for later activation.
             task.set_tid(tid)
             task.set_name(tid)
 
-            if (isinstance(hook, DatabaseLrtHook)):
+            if (isinstance(hook, PersistentLrtHook)):
                 task._set_hook(hook.get_hook())
 
                 params.update(hook.get_params())
@@ -311,7 +299,7 @@ Timed task execution
                             }
             #
 
-            AbstractTimed.run(self)
+            AbstractPersistent.run(self)
             if (task_data is not None): self._start_task(task_data)
         #
     #
@@ -329,8 +317,8 @@ Executes a task synchronously.
         _return = None
 
         if (isinstance(task_data.get("_task"), DatabaseTask)):
-            with DatabaseTaskContext(task_data['_task']): _return = Abstract._run_task(self, task_data)
-        else: _return = Abstract._run_task(self, task_data)
+            with DatabaseTaskContext(task_data['_task']): _return = AbstractPersistent._run_task(self, task_data)
+        else: _return = AbstractPersistent._run_task(self, task_data)
 
         return _return
     #
@@ -346,7 +334,7 @@ Starts the database tasks scheduler.
         """
 
         DatabaseTask._reset_stale_running()
-        AbstractTimed.start(self, params, last_return)
+        AbstractPersistent.start(self, params, last_return)
     #
 
     def unregister_timeout(self, tid):

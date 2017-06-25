@@ -30,15 +30,13 @@ https://www.direct-netware.de/redirect?licenses;gpl
 #echo(__FILEPATH__)#
 """
 
-from dNG.data.tasks.database_task import DatabaseTask
-from dNG.data.tasks.database_task_context import DatabaseTaskContext
-from dNG.database.nothing_matched_exception import NothingMatchedException
+from dNG.plugins.hook import Hook
 
-from .persistent_lrt_hook import PersistentLrtHook
+from .abstract_lrt_hook import AbstractLrtHook
 
-class DatabaseLrtHook(PersistentLrtHook):
+class PersistentLrtHook(AbstractLrtHook):
     """
-A "DatabaseLrtHook" is a database backed persistent, long running task.
+A "PersistentLrtHook" is an persistent, long running task.
 
 :author:     direct Netware Group et al.
 :copyright:  direct Netware Group - All rights reserved
@@ -49,6 +47,61 @@ A "DatabaseLrtHook" is a database backed persistent, long running task.
              GNU General Public License 2
     """
 
+    def __init__(self, hook, **kwargs):
+        """
+Constructor __init__(PersistentLrtHook)
+
+:since: v0.2.00
+        """
+
+        AbstractLrtHook.__init__(self)
+
+        self.hook = hook
+        """
+Hook
+        """
+        self.params = kwargs
+        """
+Hook parameters
+        """
+
+        self.context_id = hook
+        self.independent_scheduling = True
+    #
+
+    def __str__(self):
+        """
+python.org: Called by the str() built-in function and by the print statement
+to compute the "informal" string representation of an object.
+
+:return: (str) Informal string representation
+        """
+
+        return (object.__str__(self) if (self.hook is None) else self.hook)
+    #
+
+    def get_hook(self):
+        """
+Returns the hook being called of this long running task instance.
+
+:return: (str) Hook
+:since:  v0.2.00
+        """
+
+        return self.hook
+    #
+
+    def get_params(self):
+        """
+Returns the hook parameters used when being called.
+
+:return: (dict) Hook parameters
+:since:  v0.2.00
+        """
+
+        return self.params
+    #
+
     def _run_hook(self):
         """
 Hook execution
@@ -56,20 +109,6 @@ Hook execution
 :since: v0.2.00
         """
 
-        task = None
-        tid = self.params.get("_tid")
-
-        if (tid is not None):
-            try: task = DatabaseTask.load_tid(tid)
-            except NothingMatchedException: pass
-        #
-
-        if (task is None):
-            if (self.log_handler is not None): self.log_handler.warning("{0!r} is executed without a database task entry", self, context = "pas_tasks")
-            PersistentLrtHook.r
-        else:
-            with DatabaseTaskContext(task): Hook.call_one(self.hook, **self.params)
-        #
         Hook.call_one(self.hook, **self.params)
     #
 #

@@ -307,7 +307,6 @@ Sets values given as keyword arguments to this method.
 
             if ("time_started" in kwargs): self.local.db_instance.time_started = int(kwargs['time_started'])
             if ("time_scheduled" in kwargs): self.local.db_instance.time_scheduled = int(kwargs['time_scheduled'])
-            if ("time_updated" in kwargs): self.local.db_instance.time_updated = int(kwargs['time_updated'])
             if ("timeout" in kwargs): self.local.db_instance.timeout = int(kwargs['timeout'])
         #
     #

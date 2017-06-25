@@ -31,6 +31,7 @@ https://www.direct-netware.de/redirect?licenses;gpl
 """
 
 from dNG.data.settings import Settings
+from dNG.data.supports_mixin import SupportsMixin
 from dNG.module.named_loader import NamedLoader
 from dNG.plugins.hook import Hook
 from dNG.runtime.not_implemented_exception import NotImplementedException
@@ -38,7 +39,7 @@ from dNG.runtime.thread import Thread
 from dNG.runtime.value_exception import ValueException
 from dNG.tasks.abstract_hook import AbstractHook
 
-class Abstract(object):
+class Abstract(SupportsMixin):
     """
 Abstract class for task stores.
 
@@ -59,6 +60,8 @@ Constructor __init__(Abstract)
 
 :since: v0.2.00
         """
+
+        SupportsMixin.__init__(self)
 
         self.log_handler = NamedLoader.get_singleton("dNG.data.logging.LogHandler", False)
         """

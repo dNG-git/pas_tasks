@@ -30,15 +30,14 @@ https://www.direct-netware.de/redirect?licenses;gpl
 #echo(__FILEPATH__)#
 """
 
-from dNG.data.tasks.database_task import DatabaseTask
-from dNG.data.tasks.database_task_context import DatabaseTaskContext
-from dNG.database.nothing_matched_exception import NothingMatchedException
+from dNG.runtime.not_implemented_exception import NotImplementedException
 
-from .persistent_lrt_hook import PersistentLrtHook
+from .abstract_persistent import AbstractPersistent
 
-class DatabaseLrtHook(PersistentLrtHook):
+class AbstractPersistentProxy(AbstractPersistent):
     """
-A "DatabaseLrtHook" is a database backed persistent, long running task.
+"AbstractPersistentProxy" instances provide access to an persistent tasks
+daemon to execute scheduled tasks.
 
 :author:     direct Netware Group et al.
 :copyright:  direct Netware Group - All rights reserved
@@ -49,27 +48,15 @@ A "DatabaseLrtHook" is a database backed persistent, long running task.
              GNU General Public License 2
     """
 
-    def _run_hook(self):
+    @staticmethod
+    def is_available():
         """
-Hook execution
+True if a persistent tasks executing scheduler is available.
 
-:since: v0.2.00
+:return: (bool) True if available
+:since:  v0.2.00
         """
 
-        task = None
-        tid = self.params.get("_tid")
-
-        if (tid is not None):
-            try: task = DatabaseTask.load_tid(tid)
-            except NothingMatchedException: pass
-        #
-
-        if (task is None):
-            if (self.log_handler is not None): self.log_handler.warning("{0!r} is executed without a database task entry", self, context = "pas_tasks")
-            PersistentLrtHook.r
-        else:
-            with DatabaseTaskContext(task): Hook.call_one(self.hook, **self.params)
-        #
-        Hook.call_one(self.hook, **self.params)
+        raise NotImplementedException
     #
 #

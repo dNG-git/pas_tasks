@@ -32,8 +32,8 @@ https://www.direct-netware.de/redirect?licenses;gpl
 
 # pylint: disable=unused-argument
 
-from dNG.data.tasks.database import Database as DatabaseTasks
 from dNG.data.tasks.memory import Memory as MemoryTasks
+from dNG.data.tasks.persistent import Persistent as PersistentTasks
 from dNG.plugins.hook import Hook
 from dNG.runtime.thread_lock import ThreadLock
 from dNG.runtime.value_exception import ValueException
@@ -42,18 +42,18 @@ _lock = ThreadLock()
 """
 Thread safety lock
 """
-_database_tasks_instance = None
-"""
-DatabaseTasks instance
-"""
 _memory_tasks_instance = None
 """
 MemoryTasks instance
 """
+_persistent_tasks_instance = None
+"""
+PersistentTasks instance
+"""
 
-def add_database_task(params, last_return = None):
+def add_persistent_task(params, last_return = None):
     """
-Called for "dNG.pas.tasks.Database.add"
+Called for "dNG.pas.tasks.Persistent.add"
 
 :param params: Parameter specified
 :param last_return: The return value from the last hook called.
@@ -71,7 +71,7 @@ Called for "dNG.pas.tasks.Database.add"
          ): raise ValueException("Missing required arguments")
     else:
         kwargs = params.get("kwargs", { })
-        DatabaseTasks.get_instance().add(params['tid'], params['hook'], params['timeout'], **kwargs)
+        PersistentTasks.get_instance().add(params['tid'], params['hook'], params['timeout'], **kwargs)
         _return = True
     #
 
@@ -93,15 +93,15 @@ Called for "dNG.pas.Tasks.call"
     elif ("tid" not in params): raise ValueException("Missing required argument")
     else:
         _return = MemoryTasks.get_instance().call(params)
-        if (_return is None): _return = DatabaseTasks.get_instance().call(params)
+        if (_return is None): _return = PersistentTasks.get_instance().call(params)
     #
 
     return _return
 #
 
-def call_database_task(params, last_return = None):
+def call_persistent_task(params, last_return = None):
     """
-Called for "dNG.pas.tasks.Database.call"
+Called for "dNG.pas.tasks.Persistent.call"
 
 :param params: Parameter specified
 :param last_return: The return value from the last hook called.
@@ -114,15 +114,15 @@ Called for "dNG.pas.tasks.Database.call"
     elif ("params" not in params): raise ValueException("Missing required argument")
     else:
         chained_last_return = params.get("last_return")
-        _return = DatabaseTasks.get_instance().call(params['params'], chained_last_return)
+        _return = PersistentTasks.get_instance().call(params['params'], chained_last_return)
     #
 
     return _return
 #
 
-def get_database_task(params, last_return = None):
+def get_persistent_task(params, last_return = None):
     """
-Called for "dNG.pas.tasks.Database.get"
+Called for "dNG.pas.tasks.Persistent.get"
 
 :param params: Parameter specified
 :param last_return: The return value from the last hook called.
@@ -133,14 +133,14 @@ Called for "dNG.pas.tasks.Database.get"
 
     if (last_return is not None): _return = last_return
     elif ("tid" not in params): raise ValueException("Missing required argument")
-    else: _return = DatabaseTasks.get_instance().get(params['tid'])
+    else: _return = PersistentTasks.get_instance().get(params['tid'])
 
     return _return
 #
 
-def is_database_task_registered(params, last_return = None):
+def is_persistent_task_registered(params, last_return = None):
     """
-Called for "dNG.pas.tasks.Database.isRegistered"
+Called for "dNG.pas.tasks.Persistent.isRegistered"
 
 :param params: Parameter specified
 :param last_return: The return value from the last hook called.
@@ -153,7 +153,7 @@ Called for "dNG.pas.tasks.Database.isRegistered"
     elif ("tid" not in params): raise ValueException("Missing required argument")
     else:
         hook = params.get("hook")
-        _return = DatabaseTasks.get_instance().is_registered(params['tid'], hook)
+        _return = PersistentTasks.get_instance().is_registered(params['tid'], hook)
     #
 
     return _return
@@ -170,12 +170,12 @@ Called for "dNG.pas.Status.onShutdown"
     """
 
     # global: _lock
-    global _database_tasks_instance, _memory_tasks_instance
+    global _memory_tasks_instance, _persistent_tasks_instance
 
     with _lock:
-        if (_database_tasks_instance is not None):
-            _database_tasks_instance.stop()
-            _database_tasks_instance = None
+        if (_persistent_tasks_instance is not None):
+            _persistent_tasks_instance.stop()
+            _persistent_tasks_instance = None
         #
 
         if (_memory_tasks_instance is not None):
@@ -198,26 +198,26 @@ Called for "dNG.pas.Status.onStartup"
     """
 
     # global: _lock
-    global _database_tasks_instance, _memory_tasks_instance
+    global _memory_tasks_instance, _persistent_tasks_instance
 
     with _lock:
-        if (_database_tasks_instance is None):
-            _database_tasks_instance = DatabaseTasks.get_instance()
-            _database_tasks_instance.start()
-        #
-
         if (_memory_tasks_instance is None):
             _memory_tasks_instance = MemoryTasks.get_instance()
             _memory_tasks_instance.start()
+        #
+
+        if (_persistent_tasks_instance is None):
+            _persistent_tasks_instance = PersistentTasks.get_executing_instance()
+            _persistent_tasks_instance.start()
         #
     #
 
     return last_return
 #
 
-def register_database_timeout_task(params, last_return = None):
+def register_persistent_timeout_task(params, last_return = None):
     """
-Called for "dNG.pas.tasks.Database.registerTimeout"
+Called for "dNG.pas.tasks.Persistent.registerTimeout"
 
 :param params: Parameter specified
 :param last_return: The return value from the last hook called.
@@ -235,7 +235,7 @@ Called for "dNG.pas.tasks.Database.registerTimeout"
          ): raise ValueException("Missing required arguments")
     else:
         kwargs = params.get("kwargs", { })
-        DatabaseTasks.get_instance().register_timeout(params['tid'], params['hook'], params['timeout'], **kwargs)
+        PersistentTasks.get_instance().register_timeout(params['tid'], params['hook'], params['timeout'], **kwargs)
         _return = True
     #
 
@@ -252,19 +252,19 @@ Register plugin hooks.
     Hook.register("dNG.pas.Status.onShutdown", on_shutdown)
     Hook.register("dNG.pas.Status.onStartup", on_startup)
     Hook.register("dNG.pas.Tasks.call", call)
-    Hook.register("dNG.pas.tasks.Database.isRegistered", is_database_task_registered)
-    Hook.register("dNG.pas.tasks.Database.add", add_database_task)
-    Hook.register("dNG.pas.tasks.Database.call", call_database_task)
-    Hook.register("dNG.pas.tasks.Database.get", get_database_task)
-    Hook.register("dNG.pas.tasks.Database.registerTimeout", register_database_timeout_task)
-    Hook.register("dNG.pas.tasks.Database.remove", remove_database_task)
-    Hook.register("dNG.pas.tasks.Database.reregisterTimeout", reregister_database_timeout_task)
-    Hook.register("dNG.pas.tasks.Database.unregisterTimeout", unregister_database_timeout_task)
+    Hook.register("dNG.pas.tasks.Persistent.isRegistered", is_persistent_task_registered)
+    Hook.register("dNG.pas.tasks.Persistent.add", add_persistent_task)
+    Hook.register("dNG.pas.tasks.Persistent.call", call_persistent_task)
+    Hook.register("dNG.pas.tasks.Persistent.get", get_persistent_task)
+    Hook.register("dNG.pas.tasks.Persistent.registerTimeout", register_persistent_timeout_task)
+    Hook.register("dNG.pas.tasks.Persistent.remove", remove_persistent_task)
+    Hook.register("dNG.pas.tasks.Persistent.reregisterTimeout", reregister_persistent_timeout_task)
+    Hook.register("dNG.pas.tasks.Persistent.unregisterTimeout", unregister_persistent_timeout_task)
 #
 
-def remove_database_task(params, last_return = None):
+def remove_persistent_task(params, last_return = None):
     """
-Called for "dNG.pas.tasks.Database.remove"
+Called for "dNG.pas.tasks.Persistent.remove"
 
 :param params: Parameter specified
 :param last_return: The return value from the last hook called.
@@ -275,14 +275,14 @@ Called for "dNG.pas.tasks.Database.remove"
 
     if (last_return is not None): _return = last_return
     elif ("tid" not in params): raise ValueException("Missing required argument")
-    else: _return = DatabaseTasks.get_instance().remove(params['tid'])
+    else: _return = PersistentTasks.get_instance().remove(params['tid'])
 
     return _return
 #
 
-def reregister_database_timeout_task(params, last_return = None):
+def reregister_persistent_timeout_task(params, last_return = None):
     """
-Called for "dNG.pas.tasks.Database.reregisterTimeout"
+Called for "dNG.pas.tasks.Persistent.reregisterTimeout"
 
 :param params: Parameter specified
 :param last_return: The return value from the last hook called.
@@ -293,14 +293,14 @@ Called for "dNG.pas.tasks.Database.reregisterTimeout"
 
     if (last_return is not None): _return = last_return
     elif ("tid" not in params): raise ValueException("Missing required argument")
-    else: _return = DatabaseTasks.get_instance().reregister_timeout(params['tid'])
+    else: _return = PersistentTasks.get_instance().reregister_timeout(params['tid'])
 
     return _return
 #
 
-def unregister_database_timeout_task(params, last_return = None):
+def unregister_persistent_timeout_task(params, last_return = None):
     """
-Called for "dNG.pas.tasks.Database.unregisterTimeout"
+Called for "dNG.pas.tasks.Persistent.unregisterTimeout"
 
 :param params: Parameter specified
 :param last_return: The return value from the last hook called.
@@ -311,7 +311,7 @@ Called for "dNG.pas.tasks.Database.unregisterTimeout"
 
     if (last_return is not None): _return = last_return
     elif ("tid" not in params): raise ValueException("Missing required argument")
-    else: _return = DatabaseTasks.get_instance().unregister_timeout(params['tid'])
+    else: _return = PersistentTasks.get_instance().unregister_timeout(params['tid'])
 
     return _return
 #
@@ -326,12 +326,12 @@ Unregister plugin hooks.
     Hook.unregister("dNG.pas.Status.onShutdown", on_shutdown)
     Hook.unregister("dNG.pas.Status.onStartup", on_startup)
     Hook.unregister("dNG.pas.Tasks.call", call)
-    Hook.unregister("dNG.pas.tasks.Database.isRegistered", is_database_task_registered)
-    Hook.unregister("dNG.pas.tasks.Database.add", add_database_task)
-    Hook.unregister("dNG.pas.tasks.Database.call", call_database_task)
-    Hook.unregister("dNG.pas.tasks.Database.get", get_database_task)
-    Hook.unregister("dNG.pas.tasks.Database.registerTimeout", register_database_timeout_task)
-    Hook.unregister("dNG.pas.tasks.Database.remove", remove_database_task)
-    Hook.unregister("dNG.pas.tasks.Database.reregisterTimeout", reregister_database_timeout_task)
-    Hook.unregister("dNG.pas.tasks.Database.unregisterTimeout", unregister_database_timeout_task)
+    Hook.unregister("dNG.pas.tasks.Persistent.isRegistered", is_persistent_task_registered)
+    Hook.unregister("dNG.pas.tasks.Persistent.add", add_persistent_task)
+    Hook.unregister("dNG.pas.tasks.Persistent.call", call_persistent_task)
+    Hook.unregister("dNG.pas.tasks.Persistent.get", get_persistent_task)
+    Hook.unregister("dNG.pas.tasks.Persistent.registerTimeout", register_persistent_timeout_task)
+    Hook.unregister("dNG.pas.tasks.Persistent.remove", remove_persistent_task)
+    Hook.unregister("dNG.pas.tasks.Persistent.reregisterTimeout", reregister_persistent_timeout_task)
+    Hook.unregister("dNG.pas.tasks.Persistent.unregisterTimeout", unregister_persistent_timeout_task)
 #

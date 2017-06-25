@@ -30,15 +30,15 @@ https://www.direct-netware.de/redirect?licenses;gpl
 #echo(__FILEPATH__)#
 """
 
-from dNG.data.tasks.database_task import DatabaseTask
-from dNG.data.tasks.database_task_context import DatabaseTaskContext
-from dNG.database.nothing_matched_exception import NothingMatchedException
+from dNG.runtime.not_implemented_exception import NotImplementedException
+from dNG.tasks.abstract_timed import AbstractTimed
 
-from .persistent_lrt_hook import PersistentLrtHook
+from .abstract import Abstract
 
-class DatabaseLrtHook(PersistentLrtHook):
+class AbstractPersistent(Abstract, AbstractTimed):
     """
-A "DatabaseLrtHook" is a database backed persistent, long running task.
+"AbstractPersistent" instances provide additional scheduling related
+methods for persistent tasks.
 
 :author:     direct Netware Group et al.
 :copyright:  direct Netware Group - All rights reserved
@@ -49,27 +49,33 @@ A "DatabaseLrtHook" is a database backed persistent, long running task.
              GNU General Public License 2
     """
 
-    def _run_hook(self):
+    def __init__(self):
         """
-Hook execution
+Constructor __init__(AbstractPersistent)
 
 :since: v0.2.00
         """
 
-        task = None
-        tid = self.params.get("_tid")
+        AbstractTimed.__init__(self)
+        Abstract.__init__(self)
+    #
 
-        if (tid is not None):
-            try: task = DatabaseTask.load_tid(tid)
-            except NothingMatchedException: pass
-        #
+    @classmethod
+    def is_executing_daemon(cls):
+        """
+True if the instance is executing scheduled tasks.
 
-        if (task is None):
-            if (self.log_handler is not None): self.log_handler.warning("{0!r} is executed without a database task entry", self, context = "pas_tasks")
-            PersistentLrtHook.r
-        else:
-            with DatabaseTaskContext(task): Hook.call_one(self.hook, **self.params)
-        #
-        Hook.call_one(self.hook, **self.params)
+:return: (bool) True if executing scheduled tasks
+:since:  v0.2.00
+        """
+
+        _return = False
+
+        try:
+            persistent_tasks = cls.get_instance()
+            _return = persistent_tasks.is_started()
+        except NotImplementedException: pass
+
+        return _return
     #
 #
