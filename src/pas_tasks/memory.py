@@ -36,11 +36,11 @@ from weakref import ref
 
 from dpt_runtime.binary import Binary
 from dpt_threading.instance_lock import InstanceLock
-from pas_timed_tasks import AbstractTimed
+from pas_timed_tasks import TimedTasksMixin
 
 from .abstract import Abstract
 
-class Memory(Abstract, AbstractTimed):
+class Memory(TimedTasksMixin, Abstract):
     """
 A "Memory" instance stores tasks in the application memory. Tasks are run
 threaded. Use the LRT implementation for long running or CPU intensive
@@ -55,7 +55,7 @@ ones.
              GNU General Public License 2 or later
     """
 
-    __slots__ = [ "tasks" ]
+    __slots__ = [ "tasks" ] + TimedTasksMixin._mixin_slots_
     """
 python.org: __slots__ reserves space for the declared variables and prevents
 the automatic creation of __dict__ and __weakref__ for each instance.
@@ -76,8 +76,8 @@ Constructor __init__(Memory)
 :since: v1.0.0
         """
 
-        AbstractTimed.__init__(self)
         Abstract.__init__(self)
+        TimedTasksMixin.__init__(self)
 
         self.tasks = [ ]
         """
@@ -331,7 +331,7 @@ Timed task execution
         if (self.is_started):
             with self._lock:
                 if (len(self.tasks) > 0 and self.tasks[0]['timestamp'] <= time()): task = self.tasks.pop(0)
-                AbstractTimed.run(self)
+                TimedTasksMixin.run(self)
             #
         #
 

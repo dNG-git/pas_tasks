@@ -31,11 +31,11 @@ https://www.direct-netware.de/redirect?licenses;gpl
 """
 
 from dpt_runtime.not_implemented_exception import NotImplementedException
-from pas_timed_tasks import AbstractTimed
+from pas_timed_tasks import TimedTasksMixin
 
 from .abstract import Abstract
 
-class AbstractPersistent(Abstract, AbstractTimed):
+class AbstractPersistent(TimedTasksMixin, Abstract):
     """
 "AbstractPersistent" instances provide additional scheduling related
 methods for persistent tasks.
@@ -49,7 +49,7 @@ methods for persistent tasks.
              GNU General Public License 2 or later
     """
 
-    __slots__ = [ ]
+    __slots__ = TimedTasksMixin._mixin_slots_
     """
 python.org: __slots__ reserves space for the declared variables and prevents
 the automatic creation of __dict__ and __weakref__ for each instance.
@@ -62,8 +62,8 @@ Constructor __init__(AbstractPersistent)
 :since: v1.0.0
         """
 
-        AbstractTimed.__init__(self)
         Abstract.__init__(self)
+        TimedTasksMixin.__init__(self)
     #
 
     @classmethod
