@@ -90,6 +90,12 @@ Task status is unknown
 Task waits for execution
     """
 
+    __slots__ = [ "_id", "_hook", "_params", "_tid" ]
+    """
+python.org: __slots__ reserves space for the declared variables and prevents
+the automatic creation of __dict__ and __weakref__ for each instance.
+    """
+
     def __init__(self, db_instance = None):
         """
 Constructor __init__(Database)
@@ -105,7 +111,7 @@ Constructor __init__(Database)
         """
 Database ID used for reloading
         """
-        self.hook = ""
+        self._hook = ""
         """
 Task hook to be called
         """
@@ -121,7 +127,7 @@ Task ID
         if (db_instance is not None):
             with self:
                 self._id = self.local.db_instance.id
-                self.hook = self.local.db_instance.hook
+                self._hook = self.local.db_instance.hook
                 if (self.local.db_instance.params != ""): self.params = JsonResource.json_to_data(self.local.db_instance.params)
 
                 if ("_tid" in self.params): self.tid = self.params['_tid']
@@ -132,7 +138,7 @@ Task ID
     #
 
     @property
-    def _hook(self):
+    def hook(self):
         """
 Returns the task hook to be called.
 
@@ -140,14 +146,14 @@ Returns the task hook to be called.
 :since:  v1.0.0
         """
 
-        return (NamedClassLoader.get_instance("pas_tasks.tasks.DatabaseLrtHook", hook = self.hook, **self.params)
+        return (NamedClassLoader.get_instance("pas_tasks.tasks.DatabaseLrtHook", hook = self._hook, **self.params)
                 if (self.is_lrt) else
-                self.hook
+                self._hook
                )
     #
 
-    @_hook.setter
-    def _hook(self, hook):
+    @hook.setter
+    def hook(self, hook):
         """
 Sets the task hook to be called.
 
@@ -156,7 +162,7 @@ Sets the task hook to be called.
 :since: v1.0.0
         """
 
-        self.hook = hook
+        self._hook = hook
     #
 
     @property
@@ -338,11 +344,13 @@ Saves changes of the database task instance.
 
         with self:
             self.local.db_instance.tid = sha256(Binary.utf8_bytes(self.tid)).hexdigest()
+
+            hook = self.hook
             self._params['_tid'] = self.tid
 
-            if (self.local.db_instance.name == ""): self.local.db_instance.name = Binary.utf8(self.hook[-100:])
+            if (self.local.db_instance.name == ""): self.local.db_instance.name = Binary.utf8(hook[-100:])
             if (self.local.db_instance.status is None): self.local.db_instance.status = Task.STATUS_WAITING
-            self.local.db_instance.hook = Binary.utf8(self.hook)
+            self.local.db_instance.hook = Binary.utf8(hook)
             self.local.db_instance.params = Binary.utf8(JsonResource().data_to_json(self.params))
             self.local.db_instance.time_updated = int(time())
 

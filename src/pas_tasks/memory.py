@@ -55,6 +55,11 @@ ones.
              GNU General Public License 2 or later
     """
 
+    __slots__ = [ "tasks" ]
+    """
+python.org: __slots__ reserves space for the declared variables and prevents
+the automatic creation of __dict__ and __weakref__ for each instance.
+    """
     _instance_lock = InstanceLock()
     """
 Thread safety lock

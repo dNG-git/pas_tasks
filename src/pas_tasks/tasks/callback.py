@@ -47,6 +47,12 @@ The callback task can be used if the task store is memory based.
 
     # pylint: disable=unused-argument
 
+    __slots__ = [ "callback" ]
+    """
+python.org: __slots__ reserves space for the declared variables and prevents
+the automatic creation of __dict__ and __weakref__ for each instance.
+    """
+
     def __init__(self, callback):
         """
 Constructor __init__(Callback)

@@ -51,6 +51,12 @@ task scheduler.
              GNU General Public License 2 or later
     """
 
+    __slots__ = [ ]
+    """
+python.org: __slots__ reserves space for the declared variables and prevents
+the automatic creation of __dict__ and __weakref__ for each instance.
+    """
+
     @staticmethod
     def get_class(is_not_implemented_class_aware = False):
         """

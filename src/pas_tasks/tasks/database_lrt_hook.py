@@ -49,6 +49,12 @@ A "DatabaseLrtHook" is a database backed persistent, long running task.
              GNU General Public License 2 or later
     """
 
+    __slots__ = [ ]
+    """
+python.org: __slots__ reserves space for the declared variables and prevents
+the automatic creation of __dict__ and __weakref__ for each instance.
+    """
+
     def _run_hook(self):
         """
 Hook execution

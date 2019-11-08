@@ -49,6 +49,12 @@ A "Database" instance stores tasks in the database.
              GNU General Public License 2 or later
     """
 
+    __slots__ = [ "task" ]
+    """
+python.org: __slots__ reserves space for the declared variables and prevents
+the automatic creation of __dict__ and __weakref__ for each instance.
+    """
+
     def __init__(self, task):
         """
 Constructor __init__(DatabaseTaskContext)

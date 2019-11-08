@@ -55,6 +55,11 @@ The task proxy forwards tasks to a background daemon executing it.
              GNU General Public License 2 or later
     """
 
+    __slots__ = [ "client" ]
+    """
+python.org: __slots__ reserves space for the declared variables and prevents
+the automatic creation of __dict__ and __weakref__ for each instance.
+    """
     _lock = InstanceLock()
     """
 Thread safety lock

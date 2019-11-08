@@ -50,6 +50,12 @@ based.
 
     # pylint: disable=unused-argument
 
+    __slots__ = [ ]
+    """
+python.org: __slots__ reserves space for the declared variables and prevents
+the automatic creation of __dict__ and __weakref__ for each instance.
+    """
+
     def run(self, task_store, _tid, **kwargs):
         """
 Starts the execution of this hook synchronously.

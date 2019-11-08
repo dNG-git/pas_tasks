@@ -54,6 +54,11 @@ A "Database" instance stores tasks in the database.
              GNU General Public License 2 or later
     """
 
+    __slots__ = [ ]
+    """
+python.org: __slots__ reserves space for the declared variables and prevents
+the automatic creation of __dict__ and __weakref__ for each instance.
+    """
     _instance_lock = InstanceLock()
     """
 Thread safety lock
@@ -140,7 +145,7 @@ Returns the task for the given TID.
 
         task = Task.load_tid(tid)
 
-        _return = { "hook": task._hook,
+        _return = { "hook": task.hook,
                     "params": task.params,
                     "tid": tid,
                     "_task": task
@@ -167,11 +172,11 @@ Add a new task with the given TID to the storage for later activation.
             task.name = tid
 
             if (isinstance(hook, PersistentLrtHook)):
-                task._hook = hook.underlying_hook
+                task.hook = hook.underlying_hook
 
                 params.update(hook.params)
                 params['_lrt_hook'] = True
-            else: task._hook = hook
+            else: task.hook = hook
 
             task.params = params
 
@@ -294,7 +299,7 @@ Timed task execution
                 task.status = Task.STATUS_QUEUED
                 task.save()
 
-                task_data = { "hook": task._hook,
+                task_data = { "hook": task.hook,
                               "params": task.params,
                               "_task": task
                             }

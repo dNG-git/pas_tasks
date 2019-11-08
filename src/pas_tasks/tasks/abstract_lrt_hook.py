@@ -57,6 +57,11 @@ amount should run parallel.
 
     # pylint: disable=unused-argument
 
+    __slots__ = [ "context_id", "independent_scheduling", "_log_handler", "max_retry_delay", "min_retry_delay", "_params", "tid" ]
+    """
+python.org: __slots__ reserves space for the declared variables and prevents
+the automatic creation of __dict__ and __weakref__ for each instance.
+    """
     _context_limit = 0
     """
 Limit for allowed context executions
