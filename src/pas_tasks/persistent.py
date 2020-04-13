@@ -106,9 +106,12 @@ and execution based on the configuration set.
             Settings.read_file("{0}/settings/pas_tasks_daemon.json".format(Settings.get("path_data")))
         #
 
-        implementation_class_name = Settings.get("pas_tasks_persistent_implementation", "pas_tasks.Database")
+        implementation_class_name = (Settings.get("pas_tasks_persistent_implementation")
+                                     if (Settings.is_defined("pas_tasks_persistent_implementation")) else
+                                     None
+                                    )
 
-        _return = NamedClassLoader.get_class(implementation_class_name)
+        _return = (None if (implementation_class_name is None) else NamedClassLoader.get_class(implementation_class_name))
         if (_return is None and is_not_implemented_class_aware): _return = NotImplementedClass
 
         return _return

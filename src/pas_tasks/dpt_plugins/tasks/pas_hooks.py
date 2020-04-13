@@ -34,6 +34,7 @@ https://www.direct-netware.de/redirect?licenses;gpl
 
 from dpt_plugins import Hook
 from dpt_runtime.value_exception import ValueException
+from dpt_settings import Settings
 from dpt_threading.thread_lock import ThreadLock
 
 from ...memory import Memory as MemoryTasks
@@ -211,7 +212,7 @@ Called for "pas.Application.onStartup"
             _memory_tasks_instance.start()
         #
 
-        if (_persistent_tasks_instance is None):
+        if (Settings.is_defined("pas_tasks_persistent_implementation") and _persistent_tasks_instance is None):
             _persistent_tasks_instance = PersistentTasks.get_executing_instance()
             _persistent_tasks_instance.start()
         #
@@ -253,6 +254,10 @@ Register plugin hooks.
 
 :since: v1.0.0
     """
+
+    if (not Settings.is_defined("pas_tasks_daemon_listener_address")):
+        Settings.read_file("{0}/settings/pas_tasks_daemon.json".format(Settings.get("path_data")))
+    #
 
     Hook.register("pas.Application.onShutdown", on_shutdown)
     Hook.register("pas.Application.onStartup", on_startup)

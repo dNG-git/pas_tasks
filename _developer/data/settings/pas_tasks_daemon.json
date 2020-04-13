@@ -1,0 +1,11 @@
+# direct PAS
+# Python Application Services
+#
+# This is the initial extended JSON configuration file. Comments are removed
+# if edited. Comments must be removed before reading this JSON file with an
+# unsupported JSON parser.
+
+{
+    # Default tasks daemon listener socket
+    "pas_tasks_daemon_listener_address": "./dNG.pas.tasks.socket"
+}
