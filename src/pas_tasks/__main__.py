@@ -117,8 +117,6 @@ Callback for execution.
 :since: v1.0.0
         """
 
-        # pylint: disable=attribute-defined-outside-init
-
         Settings.read_file("{0}/settings/core.json".format(Settings.get("path_data")), True)
         Settings.read_file("{0}/settings/pas_tasks_daemon.json".format(Settings.get("path_data")), True)
         if (args.additional_settings is not None): Settings.read_file(args.additional_settings, True)
